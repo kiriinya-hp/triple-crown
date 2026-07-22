@@ -1,0 +1,66 @@
+{
+  "perfumes": {
+    "title": "🔥 Premium Arabic & Luxury Fragrances 🔥",
+    "subtitle": "Turn heads everywhere you go. Authentic, long-lasting scents that leave a lasting impression. Grab yours today!",
+    "subCategories": {
+      "Arabic Perfumes": [
+        { "name": "Asad (Eau de Parfum)", "type": "90ml = KES 500 / 110ml = KES 700 / 250ml = KES 2000", "price": "KES 500 - 2000", "image": "/perfume.png" },
+        { "name": "Yara (Body Mist)", "type": "90ml = KES 500 / 110ml = KES 700 / 250ml = KES 2000", "price": "KES 500 - 2000", "image": "/yara.jpeg" },
+        { "name": "Odor Epic (Eau de Parfum)", "type": "90ml = KES 500 / 110ml = KES 700 / 250ml = KES 2000", "price": "KES 500 - 2000", "image": "/odour.jpg" },
+        { "name": "Ameerat Al Arab", "type": "90ml = KES 500 / 110ml = KES 700 / 250ml = KES 2000", "price": "KES 500 - 2000", "image": "/ameerat.jpg" }
+      ],
+      "Luxury Collections": [
+        { "name": "Club De Nuit Milestone", "type": "Club de nuit = KES 1800", "price": "KES 1800", "image": "/club.jpg" },
+        { "name": "Onlyou Collection (Black Flower)", "type": "30ml = KES 700", "price": "KES 700", "image": "/only u.jpg" }
+      ],
+      "Specialty Collections": [
+        { "name": "Kay Ali Lovefest", "type": "Kay Ali = KES 3500", "price": "KES 3500", "image": "/kali.jpg" },
+        { "name": "Yum Yum (Body Mist)", "type": "Yum yum = KES 2000", "price": "KES 2000", "image": "/yum.jpg" },
+        { "name": "Love Hot", "type": "Love hot = KES 1500", "price": "KES 1500", "image": "/hot love.jpg" }
+      ]
+    }
+  },
+  "clothes": {
+    "title": "✨ Exclusive Designer Clothes Collection ✨",
+    "subtitle": "Unmatched elegance and supreme comfort. Step out in style and own every room you enter!",
+    "subCategories": {
+      "Romper Sets": [
+        { "name": "White Romper Set", "type": "Clean. Classic. Always in Style.", "price": "Inquire", "image": "/white r.jpeg" },
+        { "name": "Navy Blue Romper Set", "type": "Bold. Timeless. Effortlessly Elegant.", "price": "Inquire", "image": "/navy.jpeg" },
+        { "name": "Lime Green Romper Set", "type": "Fresh. Vibrant. Stand Out Beautifully.", "price": "Inquire", "image": "/lime.jpeg" },
+        { "name": "Brown Romper Set", "type": "Earthy. Chic. Naturally Sophisticated.", "price": "Inquire", "image": "/brown r.jpeg" }
+      ],
+      "Lace Dresses": [
+        { "name": "Chocolate Brown Lace Dress", "type": "Evening / Formal", "price": "Inquire", "image": "/dresses.jpeg" },
+        { "name": "Nude / Beige Lace Dress", "type": "Evening / Formal", "price": "Inquire", "image": "/dresses.jpeg" },
+        { "name": "Dusty Pink Lace Dress", "type": "Evening / Formal", "price": "Inquire", "image": "/dresses.jpeg" },
+        { "name": "Pure White Lace Dress", "type": "Evening / Formal", "price": "Inquire", "image": "/dresses.jpeg" }
+      ],
+      "Casual & Joggers": [
+        { "name": "Pink Floral Jogger Set", "type": "Lounge & Streetwear", "price": "Inquire", "image": "/rubber.jpeg" },
+        { "name": "Grey Floral Jogger Set", "type": "Lounge & Streetwear", "price": "Inquire", "image": "/rubber.jpeg" },
+        { "name": "Cream Floral Jogger Set", "type": "Lounge & Streetwear", "price": "Inquire", "image": "/rubber.jpeg" },
+        { "name": "Blue Floral Jogger Set", "type": "Lounge & Streetwear", "price": "Inquire", "image": "/rubber.jpeg" },
+        { "name": "Beige Floral Jogger Set", "type": "Lounge & Streetwear", "price": "Inquire", "image": "/rubber.jpeg" }
+      ]
+    }
+  },
+  "shoes": {
+    "title": "👟 Statement Footwear Collection 👟",
+    "subtitle": "Walk with absolute confidence. Premium quality sneakers designed for maximum comfort and unmatched drip.",
+    "subCategories": {
+      "Sneakers & Casuals": [
+        { "name": "Urban Grey/White Air Sneakers", "type": "Designer Footwear", "price": "Inquire", "image": "/shoes.jpeg" },
+        { "name": "New Balance 530 White/Black", "type": "Classic Retro Runner", "price": "Inquire", "image": "/image_30be9f.jpg" },
+        { "name": "Jordan 11 Retro White/Red", "type": "Designer Basketball Sneaker", "price": "Inquire", "image": "/image_30bec5.jpg" },
+        { "name": "Vans Off The Wall Corduroy Black", "type": "Casual Streetwear", "price": "Inquire", "image": "/image_30bf05.jpg" },
+        { "name": "Adidas Samba White/Black", "type": "Classic Indoor Sneaker", "price": "Inquire", "image": "/image_30bf59.jpg" },
+        { "name": "Nike Shox Black Total", "type": "Performance / Drip", "price": "28-35", "image": "/image_30bf7a.jpg" },
+        { "name": "Nike Air Max Plus TN Grey/Orange", "type": "Tuned Air Collection", "price": "39-46", "image": "/image_3a9ce1.jpg" },
+        { "name": "Skeleton Skull Buckle Clogs", "type": "Alternative / Streetwear Clog", "price": "Inquire", "image": "/image_3a9d24.jpg" },
+        { "name": "Executive Leather Chelsea Boots", "type": "Formal / Semi-Formal", "price": "Inquire", "image": "/image_3a9d9b.jpg" },
+        { "name": "Timberland Luxury Suede Loafers", "type": "Smart Casual Footwear", "price": "Inquire", "image": "/image_3a9dbb.jpg" }
+      ]
+    }
+  }
+}
