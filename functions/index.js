@@ -1,32 +1,134 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const { onRequest } = require("firebase-functions/v2/https");
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const cors = require("cors");
+const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
-const logger = require("firebase-functions/logger");
+const app = express();
+const saltRounds = 10;
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+// In Firebase Cloud Functions, local file writes to the function directory 
+// are temporary/ephemeral, but keeping ./users.json and ./products.json will work 
+// for local testing and basic storage.
+const filePath = path.join(__dirname, "users.json");
+const productsPath = path.join(__dirname, "products.json");
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+app.use(cors());
+app.use(express.json());
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+// Configure email transport with your App Password
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: { 
+    user: "tcrown193@gmail.com", 
+    pass: "dosidatybgdudnkz" 
+  }
+});
+
+// Middleware to check if user is verified
+const checkVerified = (req, res, next) => {
+  const userEmail = req.headers["user-email"]; 
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) return res.status(500).send("Database error");
+    const users = JSON.parse(data || "[]");
+    const user = users.find(u => u.email === userEmail);
+    if (user && user.verified) next();
+    else res.status(403).send("Access Denied: Please verify your email.");
+  });
+};
+
+app.get("/post", (req, res) => {
+  res.send("server running!!!!");
+});
+
+// Register Route
+app.post("/api/register", async (req, res) => {
+  const { name, email, phone, password } = req.body;
+
+  fs.readFile(filePath, "utf8", async (err, data) => {
+    const users = err ? [] : JSON.parse(data || "[]");
+    
+    const existingUser = users.find(u => u.email === email);
+    if (existingUser) {
+      return res.status(400).send("An account with this email already exists.");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const newUser = { name, email, phone, password: hashedPassword, id: Date.now(), verified: false, verificationCode: code };
+
+    users.push(newUser);
+    fs.writeFile(filePath, JSON.stringify(users, null, 2), async (err) => {
+      if (err) return res.status(500).send("Error saving user");
+      
+      await transporter.sendMail({
+        from: "lendingbringe@gmail.com", 
+        to: email, 
+        subject: "Verify Account",
+        text: `Use this code to verify: ${code}`
+      });
+      res.status(200).send("Registered successfully. Please verify your email via the code sent.");
+    });
+  });
+});
+
+// Verify with Code Route
+app.post("/api/verify-code", (req, res) => {
+  const { email, code } = req.body;
+  fs.readFile(filePath, "utf8", (err, data) => {
+    let users = JSON.parse(data || "[]");
+    const user = users.find(u => u.email === email && u.verificationCode === code);
+    if (user) {
+      user.verified = true;
+      delete user.verificationCode; 
+      fs.writeFile(filePath, JSON.stringify(users, null, 2), () => res.status(200).send("Verified successfully!"));
+    } else res.status(400).send("Invalid code or email.");
+  });
+});
+
+// Login Route
+app.post("/api/login", (req, res) => {
+  const { email, password } = req.body;
+  fs.readFile(filePath, "utf8", async (err, data) => {
+    const users = JSON.parse(data || "[]");
+    const user = users.find(u => u.email === email);
+    if (user && await bcrypt.compare(password, user.password)) {
+      if (!user.verified) return res.status(403).send("Please verify your email first.");
+      res.status(200).send({ message: "Login successful", user });
+    } else {
+      res.status(401).send("Invalid email or password");
+    }
+  });
+});
+
+// Verification Route (Link)
+app.get("/api/verify/:id", (req, res) => {
+  const userId = parseInt(req.params.id);
+  fs.readFile(filePath, "utf8", (err, data) => {
+    let users = JSON.parse(data || "[]");
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      user.verified = true;
+      delete user.verificationCode;
+      fs.writeFile(filePath, JSON.stringify(users, null, 2), () => res.send("<h1>Verified Successfully!</h1>"));
+    } else res.status(404).send("User not found.");
+  });
+});
+
+// Protected Marketplace Route
+app.get("/api/products", checkVerified, (req, res) => {
+  res.json({ message: "Welcome to the marketplace!", products: [] });
+});
+
+// Serve products catalog from products.json
+app.get("/api/products-catalog", checkVerified, (req, res) => {
+  fs.readFile(productsPath, "utf8", (err, data) => {
+    if (err) return res.status(500).send("Error reading products catalog.");
+    res.status(200).json(JSON.parse(data || "[]"));
+  });
+});
+
+// Export the Express app as a Firebase Cloud Function (V2)
+exports.api = onRequest(app);
