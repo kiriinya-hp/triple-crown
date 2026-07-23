@@ -1,27 +1,2 @@
-[
-  {
-    "name": "Kelvin Kiriinya",
-    "email": "kiriinyakelvin62@gmail.com",
-    "phone": "0797722331",
-    "password": "$2b$10$6nYs5BW9.7F.rMzAVOXUKewXDf13rmOQ8hFk2EP9ilZglzrGe6Md6",
-    "id": 1784545498517,
-    "verified": true
-  },
-  {
-    "name": "Kelvin Kiriinya",
-    "email": "kiriinyakelvin62@gmail.com",
-    "phone": "0797722331",
-    "password": "$2b$10$CBAl50zQQ5JBdcZdXF2hkeKCiknB4vU55xUc1XML3HjfrT2dcI49W",
-    "id": 1784840929150,
-    "verified": false,
-    "verificationCode": "267204"
-  },
-  {
-    "name": "Kelvin Kiriinya",
-    "email": "kiriinyakelvin626@gmail.com",
-    "phone": "0797722331",
-    "password": "$2b$10$9lTgt5g18SGECq7ld6cZF.imLPySwUUBBXsDfZyMG6iRWNVcPEP9u",
-    "id": 1784841229764,
-    "verified": true
-  }
-]
+
+[]
