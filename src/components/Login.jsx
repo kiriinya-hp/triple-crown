@@ -22,7 +22,8 @@ const Login = () => {
     setErrorMsg('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      // Using relative path '/api/login' routed via Firebase hosting rewrites and local proxy
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -30,18 +31,15 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // Optional: Save user info if needed
         localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/dashboard');
       } else {
-        // Parse the error message sent from the backend (/api/login)
         const errorText = await response.text();
         
         if (response.status === 403) {
           setErrorMsg("Please verify your email first.");
         } else {
-          // If credentials don't match or user doesn't exist in users.json
-          setErrorMsg("no account found");
+          setErrorMsg(errorText || "no account found");
         }
       }
     } catch (err) {
