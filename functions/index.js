@@ -156,11 +156,5 @@ app.get("/api/products-catalog", checkVerified, async (req, res) => {
   }
 });
 
-// Explicit port listener for Cloud Run health checks
-const port = process.env.PORT || 8080;
-app.listen(port, () => {
-  console.log(`Server is listening on port ${port}`);
-});
-
 // Export the Express app as a Firebase Cloud Function (V2)
 exports.api = onRequest(app);
