@@ -1,5 +1,6 @@
 import express from 'express';
 import fs from 'fs';
+import path from 'path';
 import cors from 'cors';
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
@@ -8,8 +9,13 @@ dotenv.config();
 
 const app = express();
 const saltRounds = 10;
-const filePath = './users.json';
-const productsFilePath = './products.json';
+const filePath = path.resolve('./users.json');
+const productsFilePath = path.resolve('./products.json');
+
+// Ensure users.json and products.json exist on startup to prevent read errors
+if (!fs.existsSync(filePath)) {
+  fs.writeFileSync(filePath, JSON.stringify([], null, 2));
+}
 
 // Allow requests from your Firebase frontend and local development
 app.use(cors({
@@ -19,7 +25,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Configure email transport with your App Password
+// Configure email transport with your Gmail App Password
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: { 
@@ -44,7 +50,7 @@ app.get("/post", (req, res) => {
   res.send("server running!!!!");
 });
 
-// Register Route
+// Register Route & Email Code Dispatcher
 app.post('/api/register', async (req, res) => {
   const { name, email, phone, password } = req.body;
 
@@ -59,22 +65,36 @@ app.post('/api/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
-    const newUser = { name, email, phone, password: hashedPassword, id: Date.now(), verified: false, verificationCode: code };
+    const newUser = { 
+      name, 
+      email, 
+      phone, 
+      password: hashedPassword, 
+      id: Date.now(), 
+      verified: false, 
+      verificationCode: code 
+    };
 
     users.push(newUser);
-    fs.writeFile(filePath, JSON.stringify(users, null, 2), async (err) => {
-      if (err) return res.status(500).send("Error saving user");
+    
+    fs.writeFile(filePath, JSON.stringify(users, null, 2), async (writeErr) => {
+      if (writeErr) {
+        console.error("Error saving user profile:", writeErr);
+        return res.status(500).send("Error saving user database.");
+      }
       
       const baseUrl = req.protocol + '://' + req.get('host');
 
       try {
+        // Send email containing the verification code
         await transporter.sendMail({
           from: 'tcrown193@gmail.com', 
           to: email, 
-          subject: 'Verify Account - Triple Crown',
-          text: `Click to verify: ${baseUrl}/api/verify/${newUser.id} OR use this code: ${code}`
+          subject: 'Verify Your Account - Triple Crown',
+          text: `Hello ${name},\n\nThank you for registering with Triple Crown! Please use the following 6-digit verification code to activate your account:\n\nVerification Code: ${code}\n\nOr click this link: ${baseUrl}/api/verify/${newUser.id}\n\nBest regards,\nTriple Crown Team`
         });
-        res.status(200).send("Registered successfully. Please verify your email via the link or code sent.");
+        
+        res.status(200).send("Registered successfully. Please check your email for the verification code.");
       } catch (emailErr) {
         console.error("Email sending failed:", emailErr);
         res.status(500).send("User registered, but failed to send verification email.");
@@ -92,8 +112,12 @@ app.post('/api/verify-code', (req, res) => {
     if (user) {
       user.verified = true;
       delete user.verificationCode; 
-      fs.writeFile(filePath, JSON.stringify(users, null, 2), () => res.status(200).send("Verified successfully!"));
-    } else res.status(400).send("Invalid code or email.");
+      fs.writeFile(filePath, JSON.stringify(users, null, 2), () => {
+        res.status(200).send("Verified successfully!");
+      });
+    } else {
+      res.status(400).send("Invalid verification code or email.");
+    }
   });
 });
 
@@ -121,8 +145,12 @@ app.get('/api/verify/:id', (req, res) => {
     if (user) {
       user.verified = true;
       delete user.verificationCode;
-      fs.writeFile(filePath, JSON.stringify(users, null, 2), () => res.send("<h1>Verified Successfully! You can now close this tab and log in.</h1>"));
-    } else res.status(404).send("User not found.");
+      fs.writeFile(filePath, JSON.stringify(users, null, 2), () => {
+        res.send("<h1>Verified Successfully! You can now close this tab and log in.</h1>");
+      });
+    } else {
+      res.status(404).send("User not found.");
+    }
   });
 });
 
