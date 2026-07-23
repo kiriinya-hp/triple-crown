@@ -9,8 +9,9 @@ dotenv.config();
 const app = express();
 const saltRounds = 10;
 const filePath = './users.json';
+const productsFilePath = './products.json';
 
-// Allow requests from your Firebase frontend
+// Allow requests from your Firebase frontend and local development
 app.use(cors({
   origin: ['https://triple-crown-store.web.app', 'http://localhost:3000'],
   credentials: true
@@ -130,11 +131,35 @@ app.get('/api/products', checkVerified, (req, res) => {
   res.json({ message: "Welcome to the marketplace!", products: [] });
 });
 
-// Serve products catalog from products.json
+// ==========================================
+// PRODUCTS CATALOG ROUTES
+// ==========================================
+
+// Serve products catalog from products.json to authenticated users
 app.get('/api/products-catalog', checkVerified, (req, res) => {
-  fs.readFile('./products.json', 'utf8', (err, data) => {
-    if (err) return res.status(500).send("Error reading products catalog.");
-    res.status(200).json(JSON.parse(data));
+  fs.readFile(productsFilePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error("Error reading products.json:", err);
+      return res.status(500).send("Error reading products catalog.");
+    }
+    try {
+      const catalog = JSON.parse(data || '{}');
+      res.status(200).json(catalog);
+    } catch (parseError) {
+      res.status(500).send("Invalid products configuration format.");
+    }
+  });
+});
+
+// Optional: Endpoint to update/save the products catalog JSON structure
+app.post('/api/products-catalog', checkVerified, (req, res) => {
+  const updatedCatalog = req.body;
+  fs.writeFile(productsFilePath, JSON.stringify(updatedCatalog, null, 2), (err) => {
+    if (err) {
+      console.error("Error writing to products.json:", err);
+      return res.status(500).send("Failed to update products catalog.");
+    }
+    res.status(200).send("Products catalog updated successfully!");
   });
 });
 
