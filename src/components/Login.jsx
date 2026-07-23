@@ -33,7 +33,12 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Strip out the password before saving user details locally
+        const safeUser = { ...data.user };
+        delete safeUser.password;
+
+        localStorage.setItem('user', JSON.stringify(safeUser));
         navigate('/dashboard');
       } else {
         const errorText = await response.text();
@@ -83,7 +88,7 @@ const Login = () => {
       WebkitBackdropFilter: 'blur(15px)',
       border: '1px solid rgba(255, 255, 255, 0.18)',
       borderRadius: '20px',
-      padding: 'clamp(25px, 5vw, 50px)', // Adapts padding dynamically based on screen size
+      padding: 'clamp(25px, 5vw, 50px)',
       width: '100%',
       maxWidth: '420px',
       display: 'flex',
@@ -94,7 +99,7 @@ const Login = () => {
       boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
     },
     logo: { 
-      height: 'clamp(70px, 15vw, 100px)', // Scales down smoothly on mobile screens
+      height: 'clamp(70px, 15vw, 100px)', 
       marginBottom: '15px', 
       objectFit: 'contain' 
     },

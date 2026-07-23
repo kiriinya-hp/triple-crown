@@ -16,8 +16,8 @@ const Dashboard = () => {
       setClientProfile(loggedInUser);
     }
 
-    // Fetch products securely from the backend endpoint
-    fetch('http://localhost:5000/api/products-catalog', {
+    // Pointing directly to your Render backend deployment (with localhost fallback option)
+    fetch('https://triple-crown-4a9k.onrender.com/api/products-catalog', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
