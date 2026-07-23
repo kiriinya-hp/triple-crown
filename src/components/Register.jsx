@@ -13,12 +13,15 @@ const Register = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
 
+  // Use environment variable if available, fallback to live Render URL (or localhost for local dev if needed)
+  const API_URL = import.meta.env.VITE_API_URL || 'https://triple-crown-4a9k.onrender.com';
+
   useEffect(() => {
     const interval = setInterval(() => {
       setBgIndex((prev) => (prev + 1) % backgrounds.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [backgrounds.length]);
 
   const styles = {
     pageContainer: {
@@ -55,7 +58,7 @@ const Register = () => {
     if (formData.password !== formData.confirmPassword) return alert("Passwords do not match!");
 
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch(`${API_URL}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -68,7 +71,6 @@ const Register = () => {
 
       if (response.ok) {
         alert("Registration successful! Please check your email for the verification code.");
-        // Switch view to display the code entry input field
         setIsVerifying(true);
       } else {
         const errorText = await response.text();
@@ -83,7 +85,7 @@ const Register = () => {
   const handleVerifyCode = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/verify-code', {
+      const response = await fetch(`${API_URL}/api/verify-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
