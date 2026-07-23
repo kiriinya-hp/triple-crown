@@ -120,6 +120,9 @@ app.get('/api/products-catalog', checkVerified, (req, res) => {
     res.status(200).json(JSON.parse(data));
   });
 });
+app.get('/', (req, res) => {
+  res.send('Server is up and running!');
+});
 
 app.listen(5000, () => {
   console.log("Server running on port 5000")
