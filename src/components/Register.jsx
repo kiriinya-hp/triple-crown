@@ -9,9 +9,10 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', password: '', confirmPassword: '' });
   
-  // State to manage email verification step
+  // State to manage email verification step and server cold-start loading
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Use environment variable if available, fallback to live Render URL (or localhost for local dev if needed)
   const API_URL = import.meta.env.VITE_API_URL || 'https://triple-crown-4a9k.onrender.com';
@@ -57,6 +58,7 @@ const Register = () => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) return alert("Passwords do not match!");
 
+    setLoading(true);
     try {
       const response = await fetch(`${API_URL}/api/register`, {
         method: 'POST',
@@ -79,11 +81,14 @@ const Register = () => {
     } catch (err) { 
       console.error(err);
       alert("Server error. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleVerifyCode = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await fetch(`${API_URL}/api/verify-code`, {
         method: 'POST',
@@ -104,6 +109,8 @@ const Register = () => {
     } catch (err) {
       console.error(err);
       alert("Server error during verification.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -127,7 +134,9 @@ const Register = () => {
               </div>
               
               <input type="password" placeholder="Confirm Password" style={styles.input} required onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} />
-              <button type="submit" style={styles.button}>Register</button>
+              <button type="submit" style={styles.button} disabled={loading}>
+                {loading ? "Connecting to server..." : "Register"}
+              </button>
             </form>
           </>
         ) : (
@@ -143,7 +152,9 @@ const Register = () => {
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)} 
               />
-              <button type="submit" style={styles.button}>Verify Code</button>
+              <button type="submit" style={styles.button} disabled={loading}>
+                {loading ? "Verifying..." : "Verify Code"}
+              </button>
             </form>
           </>
         )}
