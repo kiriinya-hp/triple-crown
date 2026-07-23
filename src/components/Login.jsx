@@ -8,6 +8,7 @@ const Login = () => {
   
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Auto-cycle background images every 5 seconds
   useEffect(() => {
@@ -15,15 +16,16 @@ const Login = () => {
       setBgIndex((prev) => (prev + 1) % backgrounds.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [backgrounds.length]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+    setLoading(true);
 
     try {
-      // Using relative path '/api/login' routed via Firebase hosting rewrites and local proxy
-      const response = await fetch('/api/login', {
+      // Pointing directly to your Render backend deployment
+      const response = await fetch('https://triple-crown-4a9k.onrender.com/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -39,64 +41,101 @@ const Login = () => {
         if (response.status === 403) {
           setErrorMsg("Please verify your email first.");
         } else {
-          setErrorMsg(errorText || "no account found");
+          setErrorMsg(errorText || "No account found");
         }
       }
     } catch (err) {
       console.error("Connection error:", err);
       setErrorMsg("Server connection failed. Ensure backend is running.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const styles = {
     pageContainer: {
       minHeight: '100vh',
+      width: '100vw',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       backgroundImage: `url(${backgrounds[bgIndex]})`,
-      backgroundSize: 'auto 120%',
+      backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundColor: '#000000',
       transition: 'background-image 1s ease-in-out',
-      position: 'relative'
+      position: 'relative',
+      boxSizing: 'border-box',
+      padding: '20px'
     },
     overlay: {
       position: 'absolute',
       top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)'
+      backgroundColor: 'rgba(0, 0, 0, 0.65)',
+      zIndex: 1
     },
     loginCard: {
       position: 'relative',
+      zIndex: 2,
       background: 'rgba(255, 255, 255, 0.05)',
       backdropFilter: 'blur(15px)',
       WebkitBackdropFilter: 'blur(15px)',
       border: '1px solid rgba(255, 255, 255, 0.18)',
       borderRadius: '20px',
-      padding: '50px',
-      width: '90%',
-      maxWidth: '400px',
+      padding: 'clamp(25px, 5vw, 50px)', // Adapts padding dynamically based on screen size
+      width: '100%',
+      maxWidth: '420px',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      color: '#FFF'
+      color: '#FFF',
+      boxSizing: 'border-box',
+      boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
     },
     logo: { 
-      height: '100px', 
-      marginBottom: '20px', 
+      height: 'clamp(70px, 15vw, 100px)', // Scales down smoothly on mobile screens
+      marginBottom: '15px', 
       objectFit: 'contain' 
     },
-    title: { color: '#D4AF37', fontSize: '2rem', marginBottom: '20px' },
+    title: { 
+      color: '#D4AF37', 
+      fontSize: 'clamp(1.5rem, 4vw, 2rem)', 
+      marginBottom: '20px',
+      textAlign: 'center'
+    },
     input: { 
-        padding: '15px', borderRadius: '30px', border: '1px solid rgba(255, 255, 255, 0.3)', 
-        backgroundColor: 'rgba(0, 0, 0, 0.2)', color: '#FFF', width: '100%', marginBottom: '15px', boxSizing: 'border-box' 
+      padding: '14px 18px', 
+      borderRadius: '30px', 
+      border: '1px solid rgba(255, 255, 255, 0.3)', 
+      backgroundColor: 'rgba(0, 0, 0, 0.3)', 
+      color: '#FFF', 
+      width: '100%', 
+      marginBottom: '15px', 
+      boxSizing: 'border-box',
+      fontSize: '1rem',
+      outline: 'none'
     },
     button: { 
-        padding: '15px', backgroundColor: '#D4AF37', border: 'none', borderRadius: '30px', 
-        color: '#000', fontWeight: 'bold', cursor: 'pointer', width: '100%' 
+      padding: '14px', 
+      backgroundColor: '#D4AF37', 
+      border: 'none', 
+      borderRadius: '30px', 
+      color: '#000', 
+      fontWeight: 'bold', 
+      cursor: 'pointer', 
+      width: '100%',
+      fontSize: '1rem',
+      transition: 'opacity 0.2s',
+      opacity: loading ? 0.7 : 1
     },
-    errorText: { color: '#ff6b6b', fontSize: '0.9rem', marginBottom: '15px', textAlign: 'center', fontWeight: 'bold' }
+    errorText: { 
+      color: '#ff6b6b', 
+      fontSize: '0.9rem', 
+      marginBottom: '15px', 
+      textAlign: 'center', 
+      fontWeight: 'bold' 
+    }
   };
 
   return (
@@ -115,6 +154,7 @@ const Login = () => {
             placeholder="Email" 
             style={styles.input} 
             required 
+            value={formData.email}
             onChange={(e) => setFormData({...formData, email: e.target.value})} 
           />
           <input 
@@ -122,9 +162,12 @@ const Login = () => {
             placeholder="Password" 
             style={styles.input} 
             required 
+            value={formData.password}
             onChange={(e) => setFormData({...formData, password: e.target.value})} 
           />
-          <button type="submit" style={styles.button}>Log In</button>
+          <button type="submit" style={styles.button} disabled={loading}>
+            {loading ? 'Signing In...' : 'Log In'}
+          </button>
         </form>
       </div>
     </div>
