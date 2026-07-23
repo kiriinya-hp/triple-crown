@@ -1,150 +1,182 @@
-import express from 'express';
-import fs from 'fs';
-import cors from 'cors';
-import nodemailer from 'nodemailer';
-import bcrypt from 'bcrypt';
-import dotenv from 'dotenv';
-dotenv.config();
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const app = express();
-const saltRounds = 10;
-const filePath = './users.json';
+const Login = () => {
+  const navigate = useNavigate();
+  const backgrounds = ['/dresses.jpeg', '/ladies.jpeg', '/rubber.jpeg', '/shoes.jpeg', '/perfume.png'];
+  const [bgIndex, setBgIndex] = useState(0);
+  
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
-// Allow requests from your Firebase frontend
-app.use(cors({
-  origin: ['https://triple-crown-store.web.app', 'http://localhost:3000'],
-  credentials: true
-}));
+  // Auto-cycle background images every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBgIndex((prev) => (prev + 1) % backgrounds.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [backgrounds.length]);
 
-app.use(express.json());
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setLoading(true);
 
-// Configure email transport with your App Password
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: { 
-    user: 'tcrown193@gmail.com', 
-    pass: 'dosidatybgdudnkz' 
-  }
-});
+    try {
+      // Pointing directly to your Render backend deployment
+      const response = await fetch('https://triple-crown-4a9k.onrender.com/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
 
-// Middleware to check if user is verified
-const checkVerified = (req, res, next) => {
-  const userEmail = req.headers['user-email']; 
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) return res.status(500).send("Database error");
-    const users = JSON.parse(data || '[]');
-    const user = users.find(u => u.email === userEmail);
-    if (user && user.verified) next();
-    else res.status(403).send("Access Denied: Please verify your email.");
-  });
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Strip out the password before saving user details locally
+        const safeUser = { ...data.user };
+        delete safeUser.password;
+
+        localStorage.setItem('user', JSON.stringify(safeUser));
+        navigate('/dashboard');
+      } else {
+        const errorText = await response.text();
+        
+        if (response.status === 403) {
+          setErrorMsg("Please verify your email first.");
+        } else {
+          setErrorMsg(errorText || "No account found");
+        }
+      }
+    } catch (err) {
+      console.error("Connection error:", err);
+      setErrorMsg("Server connection failed. Ensure backend is running.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const styles = {
+    pageContainer: {
+      minHeight: '100vh',
+      width: '100vw',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundImage: `url(${backgrounds[bgIndex]})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundColor: '#000000',
+      transition: 'background-image 1s ease-in-out',
+      position: 'relative',
+      boxSizing: 'border-box',
+      padding: '20px'
+    },
+    overlay: {
+      position: 'absolute',
+      top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.65)',
+      zIndex: 1
+    },
+    loginCard: {
+      position: 'relative',
+      zIndex: 2,
+      background: 'rgba(255, 255, 255, 0.05)',
+      backdropFilter: 'blur(15px)',
+      WebkitBackdropFilter: 'blur(15px)',
+      border: '1px solid rgba(255, 255, 255, 0.18)',
+      borderRadius: '20px',
+      padding: 'clamp(25px, 5vw, 50px)',
+      width: '100%',
+      maxWidth: '420px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      color: '#FFF',
+      boxSizing: 'border-box',
+      boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+    },
+    logo: { 
+      height: 'clamp(70px, 15vw, 100px)', 
+      marginBottom: '15px', 
+      objectFit: 'contain' 
+    },
+    title: { 
+      color: '#D4AF37', 
+      fontSize: 'clamp(1.5rem, 4vw, 2rem)', 
+      marginBottom: '20px',
+      textAlign: 'center'
+    },
+    input: { 
+      padding: '14px 18px', 
+      borderRadius: '30px', 
+      border: '1px solid rgba(255, 255, 255, 0.3)', 
+      backgroundColor: 'rgba(0, 0, 0, 0.3)', 
+      color: '#FFF', 
+      width: '100%', 
+      marginBottom: '15px', 
+      boxSizing: 'border-box',
+      fontSize: '1rem',
+      outline: 'none'
+    },
+    button: { 
+      padding: '14px', 
+      backgroundColor: '#D4AF37', 
+      border: 'none', 
+      borderRadius: '30px', 
+      color: '#000', 
+      fontWeight: 'bold', 
+      cursor: 'pointer', 
+      width: '100%',
+      fontSize: '1rem',
+      transition: 'opacity 0.2s',
+      opacity: loading ? 0.7 : 1
+    },
+    errorText: { 
+      color: '#ff6b6b', 
+      fontSize: '0.9rem', 
+      marginBottom: '15px', 
+      textAlign: 'center', 
+      fontWeight: 'bold' 
+    }
+  };
+
+  return (
+    <div style={styles.pageContainer}>
+      <div style={styles.overlay}></div>
+      <div style={styles.loginCard}>
+        <img src="/logo.jpeg" alt="Triple Crown Logo" style={styles.logo} />
+        
+        <h2 style={styles.title}>Sign In</h2>
+        
+        {errorMsg && <p style={styles.errorText}>{errorMsg}</p>}
+
+        <form onSubmit={handleLogin} style={{ width: '100%' }}>
+          <input 
+            type="email" 
+            placeholder="Email" 
+            style={styles.input} 
+            required 
+            value={formData.email}
+            onChange={(e) => setFormData({...formData, email: e.target.value})} 
+          />
+          <input 
+            type="password" 
+            placeholder="Password" 
+            style={styles.input} 
+            required 
+            value={formData.password}
+            onChange={(e) => setFormData({...formData, password: e.target.value})} 
+          />
+          <button type="submit" style={styles.button} disabled={loading}>
+            {loading ? 'Signing In...' : 'Log In'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 };
 
-app.get("/post", (req, res) => {
-  res.send("server running!!!!");
-});
-
-// Register Route
-app.post('/api/register', async (req, res) => {
-  const { name, email, phone, password } = req.body;
-
-  fs.readFile(filePath, 'utf8', async (err, data) => {
-    const users = err ? [] : JSON.parse(data || '[]');
-    
-    // Check if email already exists
-    const existingUser = users.find(u => u.email === email);
-    if (existingUser) {
-      return res.status(400).send("An account with this email already exists.");
-    }
-
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
-    const newUser = { name, email, phone, password: hashedPassword, id: Date.now(), verified: false, verificationCode: code };
-
-    users.push(newUser);
-    fs.writeFile(filePath, JSON.stringify(users, null, 2), async (err) => {
-      if (err) return res.status(500).send("Error saving user");
-      
-      // Automatically detect if running on Render or Localhost
-      const baseUrl = req.protocol + '://' + req.get('host');
-
-      try {
-        await transporter.sendMail({
-          from: 'tcrown193@gmail.com', 
-          to: email, 
-          subject: 'Verify Account - Triple Crown',
-          text: `Click to verify: ${baseUrl}/api/verify/${newUser.id} OR use this code: ${code}`
-        });
-        res.status(200).send("Registered successfully. Please verify your email via the link or code sent.");
-      } catch (emailErr) {
-        console.error("Email sending failed:", emailErr);
-        res.status(500).send("User registered, but failed to send verification email.");
-      }
-    });
-  });
-});
-
-// Verify with Code Route
-app.post('/api/verify-code', (req, res) => {
-  const { email, code } = req.body;
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    let users = JSON.parse(data || '[]');
-    const user = users.find(u => u.email === email && u.verificationCode === code);
-    if (user) {
-      user.verified = true;
-      delete user.verificationCode; 
-      fs.writeFile(filePath, JSON.stringify(users, null, 2), () => res.status(200).send("Verified successfully!"));
-    } else res.status(400).send("Invalid code or email.");
-  });
-});
-
-// Login Route
-app.post('/api/login', (req, res) => {
-  const { email, password } = req.body;
-  fs.readFile(filePath, 'utf8', async (err, data) => {
-    const users = JSON.parse(data || '[]');
-    const user = users.find(u => u.email === email);
-    if (user && await bcrypt.compare(password, user.password)) {
-      if (!user.verified) return res.status(403).send("Please verify your email first.");
-      res.status(200).send({ message: "Login successful", user });
-    } else {
-      res.status(401).send("Invalid email or password");
-    }
-  });
-});
-
-// Verification Route (Link)
-app.get('/api/verify/:id', (req, res) => {
-  const userId = parseInt(req.params.id);
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    let users = JSON.parse(data || '[]');
-    const user = users.find(u => u.id === userId);
-    if (user) {
-      user.verified = true;
-      delete user.verificationCode;
-      fs.writeFile(filePath, JSON.stringify(users, null, 2), () => res.send("<h1>Verified Successfully! You can now close this tab and log in.</h1>"));
-    } else res.status(404).send("User not found.");
-  });
-});
-
-// Protected Marketplace Route
-app.get('/api/products', checkVerified, (req, res) => {
-  res.json({ message: "Welcome to the marketplace!", products: [] });
-});
-
-// Serve products catalog from products.json
-app.get('/api/products-catalog', checkVerified, (req, res) => {
-  fs.readFile('./products.json', 'utf8', (err, data) => {
-    if (err) return res.status(500).send("Error reading products catalog.");
-    res.status(200).json(JSON.parse(data));
-  });
-});
-
-app.get('/', (req, res) => {
-  res.send('Server is up and running!');
-});
-
-// Use Render's dynamic port or fall back to 5000 locally
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+export default Login;
