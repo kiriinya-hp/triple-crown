@@ -25,13 +25,18 @@ app.use(cors({
 
 app.use(express.json());
 
-// Configure email transport with your Gmail App Password
+// Configure email transport with your Gmail App Password and force IPv4 for Render
 const transporter = nodemailer.createTransport({
   service: 'gmail',
+  secure: true,
   auth: { 
     user: 'tcrown193@gmail.com', 
     pass: 'dosidatybgdudnkz' 
-  }
+  },
+  tls: {
+    rejectUnauthorized: true
+  },
+  family: 4 // Forces IPv4 to bypass Render's IPv6 network routing restrictions
 });
 
 // Middleware to check if user is verified
