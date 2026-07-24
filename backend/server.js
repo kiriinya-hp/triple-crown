@@ -4,18 +4,18 @@ import cors from 'cors';
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose'; // 1. Import Mongoose
+import mongoose from 'mongoose';
 dotenv.config();
 
 const app = express();
 const saltRounds = 10;
 
-// 2. Connect to MongoDB Atlas using your environment variable
+// 1. Connect to MongoDB Atlas using your environment variable
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB Atlas successfully"))
   .catch(err => console.error("Database connection error:", err));
 
-// 3. Define a User Schema & Model
+// 2. Define a User Schema & Model
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -182,4 +182,24 @@ app.post('/api/forgot-password', async (req, res) => {
 });
 
 // Reset Password Route
+app.post('/api/reset-password', async (req, res) => {
+  const { email, code, newPassword } = req.body;
+  try {
+    const user = await User.findOne({ email, resetCode: code });
+    if (!user) return res.status(400).send("Invalid or expired reset code.");
 
+    user.password = await bcrypt.hash(newPassword, saltRounds);
+    user.resetCode = undefined;
+    await user.save();
+
+    res.status(200).send("Password updated successfully!");
+  } catch (err) {
+    res.status(500).send("Server error during password reset.");
+  }
+});
+
+// 3. Render Port Binding Fix ('0.0.0.0' explicitly listens to container traffic)
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
