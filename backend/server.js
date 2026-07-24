@@ -76,6 +76,10 @@ app.get('/api/products-catalog', checkVerified, (req, res) => {
     res.status(500).send("Failed to load products catalog from file.");
   }
 });
+// Root Route
+app.get('/', (req, res) => {
+  res.status(200).send("Triple Crown Backend API is running successfully!");
+});
 
 // Register Route
 app.post('/api/register', async (req, res) => {
