@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import cors from 'cors';
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
@@ -58,6 +59,23 @@ const checkVerified = async (req, res, next) => {
     res.status(500).send("Database error");
   }
 };
+
+// ==========================================
+// 3. Products Catalog API Endpoint (Reading from products.json)
+// ==========================================
+app.get('/api/products-catalog', checkVerified, (req, res) => {
+  try {
+    // Reads products.json dynamically from the root folder on Render/Local
+    const filePath = path.join(process.cwd(), 'products.json');
+    const rawData = fs.readFileSync(filePath, 'utf8');
+    const productsData = JSON.parse(rawData);
+
+    res.status(200).json(productsData);
+  } catch (err) {
+    console.error("Error reading products.json:", err);
+    res.status(500).send("Failed to load products catalog from file.");
+  }
+});
 
 // Register Route
 app.post('/api/register', async (req, res) => {
@@ -198,7 +216,7 @@ app.post('/api/reset-password', async (req, res) => {
   }
 });
 
-// 3. Render Port Binding Fix ('0.0.0.0' explicitly listens to container traffic)
+// 4. Render Port Binding Fix
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
