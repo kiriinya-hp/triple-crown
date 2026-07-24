@@ -140,6 +140,50 @@ app.post('/api/login', (req, res) => {
     }
   });
 });
+// Example modification for your Login component submit handler:
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  try {
+    const response = await fetch(`${API_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      // Proceed to dashboard/marketplace
+      navigate('/marketplace');
+    } else if (response.status === 403) {
+      // User is unverified! Trigger state to show verification prompt on login page
+      setIsUnverified(true);
+      alert("Please verify your email to log in.");
+    } else {
+      const errorText = await response.text();
+      alert(errorText || "Login failed.");
+    }
+  } catch (err) {
+    alert("Server error.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Function to handle resending the code from the login screen
+const handleResendCode = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/resend-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const text = await response.text();
+    alert(text);
+  } catch (err) {
+    alert("Failed to resend code.");
+  }
+};
 
 // Verification Route (Link)
 app.get('/api/verify/:id', (req, res) => {
@@ -156,6 +200,53 @@ app.get('/api/verify/:id', (req, res) => {
     } else {
       res.status(404).send("User not found.");
     }
+  });
+});
+// 1. Request Password Reset Code
+app.post('/api/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  fs.readFile(filePath, 'utf8', async (err, data) => {
+    if (err) return res.status(500).send("Database error");
+    let users = JSON.parse(data || '[]');
+    const user = users.find(u => u.email === email);
+    if (!user) return res.status(404).send("No account found with this email.");
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetCode = code;
+
+    fs.writeFile(filePath, JSON.stringify(users, null, 2), async (writeErr) => {
+      if (writeErr) return res.status(500).send("Error saving data.");
+      try {
+        await transporter.sendMail({
+          from: 'tcrown193@gmail.com',
+          to: email,
+          subject: 'Password Reset Code - Triple Crown',
+          text: `Hello ${user.name},\n\nYour password reset code is: ${code}\n\nBest regards,\nTriple Crown Team`
+        });
+        res.status(200).send("Reset code sent!");
+      } catch (emailErr) {
+        res.status(500).send("Failed to send reset email.");
+      }
+    });
+  });
+});
+
+// 2. Submit New Password
+app.post('/api/reset-password', async (req, res) => {
+  const { email, code, newPassword } = req.body;
+  fs.readFile(filePath, 'utf8', async (err, data) => {
+    if (err) return res.status(500).send("Database error");
+    let users = JSON.parse(data || '[]');
+    const user = users.find(u => u.email === email && u.resetCode === code);
+    
+    if (!user) return res.status(400).send("Invalid or expired reset code.");
+
+    user.password = await bcrypt.hash(newPassword, saltRounds);
+    delete user.resetCode;
+
+    fs.writeFile(filePath, JSON.stringify(users, null, 2), () => {
+      res.status(200).send("Password updated successfully!");
+    });
   });
 });
 
