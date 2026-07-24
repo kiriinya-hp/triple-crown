@@ -190,8 +190,8 @@ app.post('/api/forgot-password', async (req, res) => {
     await transporter.sendMail({
       from: 'tcrown193@gmail.com',
       to: email,
-      subject: 'Password Reset Code - Triple Crown',
-      text: `Your password reset code is: ${code}`
+      subject: 'Action Required: Password Reset Request - Triple Crown',
+      text: `Hello,\n\nWe recently received a request to reset the password associated with your Triple Crown account.\n\nYour secure password reset code is: ${code}\n\nIf you did not request this password reset, please disregard this email. Your account remains secure and no changes will be made.\n\nBest regards,\nThe Triple Crown Team`
     });
     res.status(200).send("Reset code sent!");
   } catch (err) {
