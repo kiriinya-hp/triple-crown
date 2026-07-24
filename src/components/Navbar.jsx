@@ -70,8 +70,8 @@ const Navbar = () => {
           justify-content: space-between;
           align-items: center;
           padding: 15px 5%;
-          backgroundColor: #000000;
-          borderBottom: 2px solid #D4AF37;
+          background-color: #000000;
+          border-bottom: 2px solid #D4AF37;
           color: #FFFFFF;
           position: sticky;
           top: 0;
@@ -85,12 +85,10 @@ const Navbar = () => {
           color: #D4AF37;
         }
 
-        /* Hide desktop links by default on mobile */
         .link-container {
           display: none;
         }
 
-        /* Hamburger button styling */
         .hamburger-btn {
           background: none;
           border: none;
@@ -109,7 +107,6 @@ const Navbar = () => {
           border-radius: 2px;
         }
 
-        /* Hamburger animation states */
         .bar.open:nth-child(1) {
           transform: translateY(8px) rotate(45deg);
         }
@@ -120,7 +117,6 @@ const Navbar = () => {
           transform: translateY(-8px) rotate(-45deg);
         }
 
-        /* Slide-out Drawer for Mobile */
         .mobile-overlay {
           position: fixed;
           top: 0;
@@ -196,7 +192,6 @@ const Navbar = () => {
           color: #D4AF37;
         }
 
-        /* App-like Fixed Bottom Bar for Mobile */
         .mobile-bottom-nav {
           position: fixed;
           bottom: 0;
@@ -229,7 +224,6 @@ const Navbar = () => {
           color: #D4AF37;
         }
 
-        {/* Desktop Media Query */}
         @media (min-width: 768px) {
           .navbar {
             padding: 20px 5%;
