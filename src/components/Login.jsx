@@ -162,8 +162,8 @@ const Login = () => {
 
   const styles = {
     pageContainer: {
-      minHeight: '100vh', 
-      width: '100vw', 
+      minHeight: 'calc(100vh - 70px)', 
+      width: '100%', 
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center',
@@ -173,7 +173,7 @@ const Login = () => {
       backgroundColor: '#000000', 
       transition: 'background-image 1s ease-in-out', 
       position: 'relative', 
-      padding: '16px', 
+      padding: '20px 16px', 
       boxSizing: 'border-box'
     },
     overlay: { 
@@ -188,20 +188,22 @@ const Login = () => {
     loginCard: {
       position: 'relative', 
       zIndex: 2, 
-      background: 'rgba(20, 20, 20, 0.75)', 
+      background: 'rgba(20, 20, 20, 0.8)', 
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)', 
-      border: '1px solid rgba(255, 255, 255, 0.15)', 
-      borderRadius: '24px',
-      padding: 'clamp(24px, 5vw, 40px)', 
+      border: '1px solid rgba(212, 175, 55, 0.3)', 
+      borderRadius: '16px',
+      padding: 'clamp(20px, 4vw, 35px)', 
       width: '100%', 
-      maxWidth: '400px', 
+      maxWidth: '380px', 
       display: 'flex', 
       flexDirection: 'column',
       alignItems: 'center', 
       color: '#FFF', 
       boxSizing: 'border-box', 
-      boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)'
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6)',
+      marginTop: '10px',
+      marginBottom: '60px'
     },
     logo: { 
       height: 'clamp(60px, 12vw, 85px)', 
@@ -231,7 +233,7 @@ const Login = () => {
       width: '100%', 
       marginBottom: '14px',
       boxSizing: 'border-box', 
-      fontSize: '16px', // Prevents iOS auto-zoom on input focus
+      fontSize: '16px', 
       outline: 'none'
     },
     button: {

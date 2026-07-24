@@ -107,8 +107,8 @@ app.post('/api/register', async (req, res) => {
     await transporter.sendMail({
       from: 'tcrown193@gmail.com', 
       to: email, 
-      subject: 'Verify Your Account - Triple Crown',
-      text: `Hello ${name},\n\nYour verification code is: ${code}\n\nOr click: ${baseUrl}/api/verify/${newUser.id}`
+      subject: 'Action Required: Verify Your Triple Crown Account',
+      text: `Hello ${name},\n\nThank you for registering with Triple Crown. To complete your account setup and activate your profile, please use your secure verification code or click the activation link below:\n\nVerification Code: ${code}\n\nActivation Link: Please enter your verification code directly on the verification page.\n\nIf you have any questions or did not initiate this request, please feel free to reach out to our support team.\n\nBest regards,\nThe Triple Crown Team`
     });
     
     res.status(200).send("Registered successfully. Please check your email for the verification code.");
