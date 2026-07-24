@@ -1,23 +1,35 @@
 import express from 'express';
-import fs from 'fs';
 import path from 'path';
 import cors from 'cors';
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose'; // 1. Import Mongoose
 dotenv.config();
 
 const app = express();
 const saltRounds = 10;
-const filePath = path.resolve('./users.json');
-const productsFilePath = path.resolve('./products.json');
 
-// Ensure users.json and products.json exist on startup to prevent read errors
-if (!fs.existsSync(filePath)) {
-  fs.writeFileSync(filePath, JSON.stringify([], null, 2));
-}
+// 2. Connect to MongoDB Atlas using your environment variable
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("Connected to MongoDB Atlas successfully"))
+  .catch(err => console.error("Database connection error:", err));
 
-// Allow requests from your Firebase frontend and local development
+// 3. Define a User Schema & Model
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phone: { type: String, required: true },
+  password: { type: String, required: true },
+  id: { type: Number, required: true },
+  verified: { type: Boolean, default: false },
+  verificationCode: String,
+  resetCode: String
+});
+
+const User = mongoose.model('User', userSchema);
+
+// Allow requests from your frontend and local development
 app.use(cors({
   origin: ['https://triple-crown-store.web.app', 'http://localhost:3000'],
   credentials: true
@@ -25,7 +37,6 @@ app.use(cors({
 
 app.use(express.json());
 
-// Configure email transport with your Gmail App Password and force IPv4 for Render
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   secure: true,
@@ -33,44 +44,35 @@ const transporter = nodemailer.createTransport({
     user: 'tcrown193@gmail.com', 
     pass: 'dosidatybgdudnkz' 
   },
-  tls: {
-    rejectUnauthorized: true
-  },
-  family: 4 // Forces IPv4 to bypass Render's IPv6 network routing restrictions
+  family: 4 
 });
 
 // Middleware to check if user is verified
-const checkVerified = (req, res, next) => {
+const checkVerified = async (req, res, next) => {
   const userEmail = req.headers['user-email']; 
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) return res.status(500).send("Database error");
-    const users = JSON.parse(data || '[]');
-    const user = users.find(u => u.email === userEmail);
+  try {
+    const user = await User.findOne({ email: userEmail });
     if (user && user.verified) next();
     else res.status(403).send("Access Denied: Please verify your email.");
-  });
+  } catch (err) {
+    res.status(500).send("Database error");
+  }
 };
 
-app.get("/post", (req, res) => {
-  res.send("server running!!!!");
-});
-
-// Register Route & Email Code Dispatcher
+// Register Route
 app.post('/api/register', async (req, res) => {
   const { name, email, phone, password } = req.body;
 
-  fs.readFile(filePath, 'utf8', async (err, data) => {
-    const users = err ? [] : JSON.parse(data || '[]');
-    
-    // Check if email already exists
-    const existingUser = users.find(u => u.email === email);
+  try {
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).send("An account with this email already exists.");
     }
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
-    const newUser = { 
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    const newUser = new User({ 
       name, 
       email, 
       phone, 
@@ -78,217 +80,122 @@ app.post('/api/register', async (req, res) => {
       id: Date.now(), 
       verified: false, 
       verificationCode: code 
-    };
-
-    users.push(newUser);
-    
-    fs.writeFile(filePath, JSON.stringify(users, null, 2), async (writeErr) => {
-      if (writeErr) {
-        console.error("Error saving user profile:", writeErr);
-        return res.status(500).send("Error saving user database.");
-      }
-      
-      const baseUrl = req.protocol + '://' + req.get('host');
-
-      try {
-        // Send email containing the verification code
-        await transporter.sendMail({
-          from: 'tcrown193@gmail.com', 
-          to: email, 
-          subject: 'Verify Your Account - Triple Crown',
-          text: `Hello ${name},\n\nThank you for registering with Triple Crown! Please use the following 6-digit verification code to activate your account:\n\nVerification Code: ${code}\n\nOr click this link: ${baseUrl}/api/verify/${newUser.id}\n\nBest regards,\nTriple Crown Team`
-        });
-        
-        res.status(200).send("Registered successfully. Please check your email for the verification code.");
-      } catch (emailErr) {
-        console.error("Email sending failed:", emailErr);
-        res.status(500).send("User registered, but failed to send verification email.");
-      }
     });
-  });
+
+    await newUser.save();
+    
+    const baseUrl = req.protocol + '://' + req.get('host');
+
+    await transporter.sendMail({
+      from: 'tcrown193@gmail.com', 
+      to: email, 
+      subject: 'Verify Your Account - Triple Crown',
+      text: `Hello ${name},\n\nYour verification code is: ${code}\n\nOr click: ${baseUrl}/api/verify/${newUser.id}`
+    });
+    
+    res.status(200).send("Registered successfully. Please check your email for the verification code.");
+  } catch (emailErr) {
+    console.error("Registration/Email error:", emailErr);
+    res.status(500).send("Error processing registration.");
+  }
 });
 
 // Verify with Code Route
-app.post('/api/verify-code', (req, res) => {
+app.post('/api/verify-code', async (req, res) => {
   const { email, code } = req.body;
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    let users = JSON.parse(data || '[]');
-    const user = users.find(u => u.email === email && u.verificationCode === code);
+  try {
+    const user = await User.findOne({ email, verificationCode: code });
     if (user) {
       user.verified = true;
-      delete user.verificationCode; 
-      fs.writeFile(filePath, JSON.stringify(users, null, 2), () => {
-        res.status(200).send("Verified successfully!");
-      });
+      user.verificationCode = undefined; 
+      await user.save();
+      res.status(200).send("Verified successfully!");
     } else {
       res.status(400).send("Invalid verification code or email.");
     }
-  });
+  } catch (err) {
+    res.status(500).send("Server error during verification.");
+  }
 });
 
 // Login Route
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
-  fs.readFile(filePath, 'utf8', async (err, data) => {
-    const users = JSON.parse(data || '[]');
-    const user = users.find(u => u.email === email);
+  try {
+    const user = await User.findOne({ email });
     if (user && await bcrypt.compare(password, user.password)) {
       if (!user.verified) return res.status(403).send("Please verify your email first.");
       res.status(200).send({ message: "Login successful", user });
     } else {
       res.status(401).send("Invalid email or password");
     }
-  });
-});
-// Example modification for your Login component submit handler:
-const handleLogin = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  try {
-    const response = await fetch(`${API_URL}/api/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      // Proceed to dashboard/marketplace
-      navigate('/marketplace');
-    } else if (response.status === 403) {
-      // User is unverified! Trigger state to show verification prompt on login page
-      setIsUnverified(true);
-      alert("Please verify your email to log in.");
-    } else {
-      const errorText = await response.text();
-      alert(errorText || "Login failed.");
-    }
   } catch (err) {
-    alert("Server error.");
-  } finally {
-    setLoading(false);
+    res.status(500).send("Server error during login.");
   }
-};
-
-// Function to handle resending the code from the login screen
-const handleResendCode = async () => {
-  try {
-    const response = await fetch(`${API_URL}/api/resend-code`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    const text = await response.text();
-    alert(text);
-  } catch (err) {
-    alert("Failed to resend code.");
-  }
-};
-
-// Verification Route (Link)
-app.get('/api/verify/:id', (req, res) => {
-  const userId = parseInt(req.params.id);
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    let users = JSON.parse(data || '[]');
-    const user = users.find(u => u.id === userId);
-    if (user) {
-      user.verified = true;
-      delete user.verificationCode;
-      fs.writeFile(filePath, JSON.stringify(users, null, 2), () => {
-        res.send("<h1>Verified Successfully! You can now close this tab and log in.</h1>");
-      });
-    } else {
-      res.status(404).send("User not found.");
-    }
-  });
 });
-// 1. Request Password Reset Code
+
+// Resend Code Route
+app.post('/api/resend-code', async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).send("User not found.");
+    if (user.verified) return res.status(400).send("Account is already verified.");
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    user.verificationCode = code;
+    await user.save();
+
+    await transporter.sendMail({
+      from: 'tcrown193@gmail.com', 
+      to: email, 
+      subject: 'New Verification Code - Triple Crown',
+      text: `Your new verification code is: ${code}`
+    });
+    res.status(200).send("Verification code resent successfully!");
+  } catch (err) {
+    res.status(500).send("Failed to resend code.");
+  }
+});
+
+// Forgot Password Route
 app.post('/api/forgot-password', async (req, res) => {
   const { email } = req.body;
-  fs.readFile(filePath, 'utf8', async (err, data) => {
-    if (err) return res.status(500).send("Database error");
-    let users = JSON.parse(data || '[]');
-    const user = users.find(u => u.email === email);
+  try {
+    const user = await User.findOne({ email });
     if (!user) return res.status(404).send("No account found with this email.");
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     user.resetCode = code;
+    await user.save();
 
-    fs.writeFile(filePath, JSON.stringify(users, null, 2), async (writeErr) => {
-      if (writeErr) return res.status(500).send("Error saving data.");
-      try {
-        await transporter.sendMail({
-          from: 'tcrown193@gmail.com',
-          to: email,
-          subject: 'Password Reset Code - Triple Crown',
-          text: `Hello ${user.name},\n\nYour password reset code is: ${code}\n\nBest regards,\nTriple Crown Team`
-        });
-        res.status(200).send("Reset code sent!");
-      } catch (emailErr) {
-        res.status(500).send("Failed to send reset email.");
-      }
+    await transporter.sendMail({
+      from: 'tcrown193@gmail.com',
+      to: email,
+      subject: 'Password Reset Code - Triple Crown',
+      text: `Your password reset code is: ${code}`
     });
-  });
+    res.status(200).send("Reset code sent!");
+  } catch (err) {
+    res.status(500).send("Failed to send reset email.");
+  }
 });
 
-// 2. Submit New Password
+// Reset Password Route
 app.post('/api/reset-password', async (req, res) => {
   const { email, code, newPassword } = req.body;
-  fs.readFile(filePath, 'utf8', async (err, data) => {
-    if (err) return res.status(500).send("Database error");
-    let users = JSON.parse(data || '[]');
-    const user = users.find(u => u.email === email && u.resetCode === code);
-    
+  try {
+    const user = await User.findOne({ email, resetCode: code });
     if (!user) return res.status(400).send("Invalid or expired reset code.");
 
     user.password = await bcrypt.hash(newPassword, saltRounds);
-    delete user.resetCode;
+    user.resetCode = undefined;
+    await user.save();
 
-    fs.writeFile(filePath, JSON.stringify(users, null, 2), () => {
-      res.status(200).send("Password updated successfully!");
-    });
-  });
-});
-
-// Protected Marketplace Route
-app.get('/api/products', checkVerified, (req, res) => {
-  res.json({ message: "Welcome to the marketplace!", products: [] });
-});
-
-// ==========================================
-// PRODUCTS CATALOG ROUTES
-// ==========================================
-
-// Serve products catalog from products.json to authenticated users
-app.get('/api/products-catalog', checkVerified, (req, res) => {
-  fs.readFile(productsFilePath, 'utf8', (err, data) => {
-    if (err) {
-      console.error("Error reading products.json:", err);
-      return res.status(500).send("Error reading products catalog.");
-    }
-    try {
-      const catalog = JSON.parse(data || '{}');
-      res.status(200).json(catalog);
-    } catch (parseError) {
-      res.status(500).send("Invalid products configuration format.");
-    }
-  });
-});
-
-// Optional: Endpoint to update/save the products catalog JSON structure
-app.post('/api/products-catalog', checkVerified, (req, res) => {
-  const updatedCatalog = req.body;
-  fs.writeFile(productsFilePath, JSON.stringify(updatedCatalog, null, 2), (err) => {
-    if (err) {
-      console.error("Error writing to products.json:", err);
-      return res.status(500).send("Failed to update products catalog.");
-    }
-    res.status(200).send("Products catalog updated successfully!");
-  });
-});
-
-app.get('/', (req, res) => {
-  res.send('Server is up and running!');
+    res.status(200).send("Password updated successfully!");
+  } catch (err) {
+    res.status(500).send("Server error during password reset.");
+  }
 });
 
 const PORT = process.env.PORT || 5000;
