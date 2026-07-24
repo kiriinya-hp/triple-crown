@@ -182,23 +182,4 @@ app.post('/api/forgot-password', async (req, res) => {
 });
 
 // Reset Password Route
-app.post('/api/reset-password', async (req, res) => {
-  const { email, code, newPassword } = req.body;
-  try {
-    const user = await User.findOne({ email, resetCode: code });
-    if (!user) return res.status(400).send("Invalid or expired reset code.");
 
-    user.password = await bcrypt.hash(newPassword, saltRounds);
-    user.resetCode = undefined;
-    await user.save();
-
-    res.status(200).send("Password updated successfully!");
-  } catch (err) {
-    res.status(500).send("Server error during password reset.");
-  }
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
