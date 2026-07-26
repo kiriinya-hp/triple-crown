@@ -7,6 +7,7 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  // Handle sticky blur effect on scroll & read session storage
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
@@ -16,6 +17,7 @@ const Navbar = () => {
       }
     };
 
+    // Check session storage for logged in user state
     const checkUserSession = () => {
       const storedUser = sessionStorage.getItem('user');
       if (storedUser) {
@@ -31,6 +33,8 @@ const Navbar = () => {
 
     window.addEventListener('scroll', handleScroll);
     checkUserSession();
+
+    // Listen to storage changes across tabs/components
     window.addEventListener('storage', checkUserSession);
 
     return () => {
@@ -57,9 +61,10 @@ const Navbar = () => {
             <span className="logo-icon">👑</span>
             <span className="logo-text">TRIPLE CROWN</span>
           </Link>
-          <span className="nav-subtitle-tag">Luxury Fragrance & Design</span>
+          <span className="nav-subtitle-tag">Luxury & Design</span>
         </div>
         
+        {/* Desktop Links with Luxury Hover Indicators & Session State */}
         <div className="link-container">
           <Link to="/" className="nav-link">
             <span>Home</span>
@@ -93,6 +98,7 @@ const Navbar = () => {
           )}
         </div>
 
+        {/* Mobile Hamburger Button */}
         <button className="hamburger-btn" onClick={toggleMenu} aria-label="Toggle Menu">
           <span className={`bar ${isOpen ? 'open' : ''}`}></span>
           <span className={`bar ${isOpen ? 'open' : ''}`}></span>
@@ -100,6 +106,7 @@ const Navbar = () => {
         </button>
       </nav>
 
+      {/* Mobile Slide-out Menu Overlay & Drawer */}
       <div className={`mobile-overlay ${isOpen ? 'active' : ''}`} onClick={closeMenu}></div>
       <div className={`mobile-drawer ${isOpen ? 'open' : ''}`}>
         <div className="drawer-header">
@@ -138,6 +145,7 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Mobile App-like Bottom Navigation Bar */}
       <div className="mobile-bottom-nav">
         <Link to="/" className="bottom-nav-item" onClick={closeMenu}>
           <span>🏠</span>
@@ -165,24 +173,29 @@ const Navbar = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 20px 5%;
-          background: radial-gradient(circle at 50% 20%, rgba(26, 26, 26, 0.9) 0%, rgba(8, 8, 8, 0.9) 55%, rgba(0, 0, 0, 0.9) 100%);
+          width: 100vw;
+          margin: 0;
+          left: 50%;
+          right: 50%;
+          margin-left: -50vw;
+          margin-right: -50vw;
+          padding: 18px 6%;
+          background-color: rgba(5, 5, 5, 0.85);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
-          border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+          border-bottom: 1px solid rgba(212, 175, 55, 0.25);
           color: #FFFFFF;
           position: sticky;
           top: 0;
           z-index: 1000;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          width: 100%;
           box-sizing: border-box;
         }
 
         .navbar-scrolled {
-          padding: 14px 5%;
-          background: rgba(5, 5, 5, 0.95);
-          border-bottom: 1px solid rgba(212, 175, 55, 0.5);
+          padding: 12px 6%;
+          background-color: rgba(2, 2, 2, 0.95);
+          border-bottom: 1px solid rgba(212, 175, 55, 0.45);
           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
         }
 
@@ -199,8 +212,8 @@ const Navbar = () => {
           text-decoration: none;
           font-size: 1.35rem;
           font-weight: 800;
-          letter-spacing: 2px;
-          background: linear-gradient(135deg, #fff 20%, #D4AF37 70%, #aa8c2c 100%);
+          letter-spacing: 2.5px;
+          background: linear-gradient(135deg, #fff 30%, #D4AF37 80%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           filter: drop-shadow(0 2px 10px rgba(212, 175, 55, 0.3));
@@ -213,6 +226,7 @@ const Navbar = () => {
 
         .logo-icon {
           font-size: 1.1rem;
+          filter: none;
           -webkit-text-fill-color: initial;
         }
 
@@ -220,8 +234,8 @@ const Navbar = () => {
           font-size: 0.55rem;
           text-transform: uppercase;
           letter-spacing: 3px;
-          color: #f7e2a0;
-          opacity: 0.85;
+          color: #D4AF37;
+          opacity: 0.8;
           margin-top: -2px;
           margin-left: 2px;
         }
@@ -231,8 +245,8 @@ const Navbar = () => {
         }
 
         .hamburger-btn {
-          background: rgba(212, 175, 55, 0.06);
-          border: 1px solid rgba(212, 175, 55, 0.35);
+          background: rgba(212, 175, 55, 0.08);
+          border: 1px solid rgba(212, 175, 55, 0.3);
           border-radius: 50%;
           cursor: pointer;
           display: flex;
@@ -247,7 +261,7 @@ const Navbar = () => {
         }
 
         .hamburger-btn:hover {
-          background: rgba(212, 175, 55, 0.15);
+          background: rgba(212, 175, 55, 0.2);
           border-color: #D4AF37;
         }
 
@@ -259,22 +273,29 @@ const Navbar = () => {
           border-radius: 2px;
         }
 
-        .bar.open:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .bar.open:nth-child(2) { opacity: 0; transform: scaleX(0); }
-        .bar.open:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        .bar.open:nth-child(1) {
+          transform: translateY(7px) rotate(45deg);
+        }
+        .bar.open:nth-child(2) {
+          opacity: 0;
+          transform: scaleX(0);
+        }
+        .bar.open:nth-child(3) {
+          transform: translateY(-7px) rotate(-45deg);
+        }
 
         .mobile-overlay {
           position: fixed;
           top: 0;
           left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.85);
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.75);
           visibility: hidden;
           opacity: 0;
           transition: all 0.4s ease-in-out;
           z-index: 1001;
-          backdrop-filter: blur(8px);
+          backdrop-filter: blur(5px);
         }
 
         .mobile-overlay.active {
@@ -288,23 +309,25 @@ const Navbar = () => {
           right: -320px;
           width: 300px;
           height: 100%;
-          background-color: #121212;
-          border-left: 1px solid rgba(212, 175, 55, 0.4);
+          background-color: #0b0b0b;
+          border-left: 1px solid rgba(212, 175, 55, 0.35);
           transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
           z-index: 1002;
           display: flex;
           flex-direction: column;
-          box-shadow: -15px 0 40px rgba(0,0,0,0.9);
+          box-shadow: -15px 0 40px rgba(0,0,0,0.8);
         }
 
-        .mobile-drawer.open { right: 0; }
+        .mobile-drawer.open {
+          right: 0;
+        }
 
         .drawer-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           padding: 24px;
-          border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
           color: #D4AF37;
           font-weight: 700;
           font-size: 1.1rem;
@@ -332,7 +355,9 @@ const Navbar = () => {
           transition: background 0.2s;
         }
 
-        .close-btn:hover { background: rgba(212, 175, 55, 0.2); }
+        .close-btn:hover {
+          background: rgba(212, 175, 55, 0.2);
+        }
 
         .drawer-links {
           display: flex;
@@ -372,6 +397,7 @@ const Navbar = () => {
           margin-top: 10px;
           padding: 14px;
           border-radius: 10px;
+          border: none;
           font-weight: 600;
           font-size: 1rem;
           cursor: pointer;
@@ -382,21 +408,24 @@ const Navbar = () => {
           transition: all 0.3s;
         }
 
-        .drawer-auth-action:hover { background: rgba(255, 50, 50, 0.25); }
+        .drawer-auth-action:hover {
+          background: rgba(255, 50, 50, 0.25);
+        }
 
         .mobile-bottom-nav {
           position: fixed;
           bottom: 0;
           left: 0;
-          width: 100%;
-          background: rgba(12, 12, 12, 0.95);
+          width: 100vw;
+          background: rgba(10, 10, 10, 0.95);
           backdrop-filter: blur(12px);
-          border-top: 1px solid rgba(212, 175, 55, 0.3);
+          border-top: 1px solid rgba(212, 175, 55, 0.25);
           display: flex;
           justify-content: space-around;
           padding: 10px 0;
           z-index: 999;
-          box-shadow: 0 -5px 20px rgba(0,0,0,0.6);
+          box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+          box-sizing: border-box;
         }
 
         .bottom-nav-item {
@@ -410,8 +439,13 @@ const Navbar = () => {
           transition: color 0.2s;
         }
 
-        .bottom-nav-item span:first-child { font-size: 1.25rem; }
-        .bottom-nav-item:hover, .bottom-nav-item:active { color: #D4AF37; }
+        .bottom-nav-item span:first-child {
+          font-size: 1.25rem;
+        }
+
+        .bottom-nav-item:hover, .bottom-nav-item:active {
+          color: #D4AF37;
+        }
 
         @media (min-width: 768px) {
           .hamburger-btn, .mobile-drawer, .mobile-overlay, .mobile-bottom-nav {
@@ -421,7 +455,7 @@ const Navbar = () => {
           .link-container {
             display: flex;
             align-items: center;
-            gap: 32px;
+            gap: 30px;
           }
 
           .nav-link {
@@ -435,7 +469,9 @@ const Navbar = () => {
             transition: color 0.3s ease;
           }
 
-          .nav-link:hover { color: #D4AF37; }
+          .nav-link:hover {
+            color: #D4AF37;
+          }
 
           .nav-link::after {
             content: '';
@@ -449,18 +485,22 @@ const Navbar = () => {
             box-shadow: 0 0 8px #D4AF37;
           }
 
-          .nav-link:hover::after { width: 100%; }
+          .nav-link:hover::after {
+            width: 100%;
+          }
 
           .nav-dashboard-pill {
             background: rgba(212, 175, 55, 0.1);
             border: 1px solid rgba(212, 175, 55, 0.4);
-            padding: 8px 20px;
+            padding: 8px 18px;
             border-radius: 30px;
             color: #f7e2a0 !important;
             transition: all 0.3s ease;
           }
 
-          .nav-dashboard-pill::after { display: none; }
+          .nav-dashboard-pill::after {
+            display: none;
+          }
 
           .nav-dashboard-pill:hover {
             background: rgba(212, 175, 55, 0.2);
@@ -471,27 +511,27 @@ const Navbar = () => {
 
           .nav-auth-btn {
             position: relative;
-            padding: 10px 28px;
-            border-radius: 35px;
-            font-size: 0.95rem;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
             font-weight: 600;
             text-decoration: none;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.5px;
             overflow: hidden;
           }
 
           .nav-register-btn {
             background: linear-gradient(135deg, #f3c643 0%, #D4AF37 50%, #9e8125 100%);
             color: #050505;
-            border: 2px solid #D4AF37;
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+            border: 1px solid #D4AF37;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
           }
 
           .nav-register-btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.55);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
             filter: brightness(1.05);
           }
 
@@ -504,7 +544,7 @@ const Navbar = () => {
             background: linear-gradient(
               to right,
               rgba(255,255,255,0) 0%,
-              rgba(255,255,255,0.3) 50%,
+              rgba(255,255,255,0.35) 50%,
               rgba(255,255,255,0) 100%
             );
             transform: rotate(30deg) translateX(-100%);
