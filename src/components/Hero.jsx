@@ -29,6 +29,8 @@ const Hero = () => {
 
   const [windowIndices, setWindowIndices] = useState([0, 1, 2, 3]);
   const [glitchActive, setGlitchActive] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [whatsappUrl, setWhatsappUrl] = useState('');
 
   useEffect(() => {
     const intervals = windowIndices.map((_, i) => {
@@ -52,6 +54,29 @@ const Hero = () => {
     };
   }, []);
 
+  // Handler for WhatsApp inquiry with registration/authentication check
+  const handleWhatsAppInquiry = (e, inquiryText) => {
+    e.preventDefault();
+    const loggedInUser = localStorage.getItem('user');
+    const targetUrl = `https://wa.me/254799394055?text=${encodeURIComponent(inquiryText)}`;
+
+    if (!loggedInUser) {
+      // User is not registered/logged in, intercept and show auth/registration modal
+      setWhatsappUrl(targetUrl);
+      setShowAuthModal(true);
+    } else {
+      // User is registered/logged in, proceed directly to WhatsApp
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleAuthRedirect = (isRegistering) => {
+    // Placeholder logic for routing to register or dashboard/login page
+    setShowAuthModal(false);
+    // You can replace this route path with your actual registration/login page route handler
+    window.location.href = isRegistering ? '/register' : '/dashboard';
+  };
+
   return (
     <section className="hero-section">
       {/* Decorative ambient background glows */}
@@ -65,8 +90,9 @@ const Hero = () => {
         <p className="hero-description">{description}</p>
         
         <div className="hero-cta-group">
-          <a href="#collection" className="hero-btn primary-btn">Explore Collection</a>
-          <a href="#fragrances" className="hero-btn secondary-btn">Discover Fragrances</a>
+          {/* Redirects directly to the dashboard */}
+          <a href="/dashboard" className="hero-btn primary-btn">Explore Collection</a>
+          <a href="/dashboard" className="hero-btn secondary-btn">Discover Fragrances</a>
         </div>
       </div>
       
@@ -88,6 +114,32 @@ const Hero = () => {
         ))}
       </div>
 
+      {/* WhatsApp Inquiry General CTA Button with Account Guard */}
+      <div className="hero-general-inquiry">
+        <a 
+          href="#whatsapp" 
+          onClick={(e) => handleWhatsAppInquiry(e, "Hello, I would like to inquire for more information regarding Triple Crown Fragrance and Design.")}
+          className="hero-whatsapp-btn"
+        >
+          💬 Inquire for More Information via WhatsApp
+        </a>
+      </div>
+
+      {/* Authentication / Registration Modal Popup */}
+      {showAuthModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button className="close-modal-btn" onClick={() => setShowAuthModal(false)}>✕</button>
+            <h3 className="modal-title">Account Registration Required</h3>
+            <p className="modal-text">You must be registered and logged into an account to proceed with WhatsApp inquiries.</p>
+            <div className="modal-actions">
+              <button className="hero-btn primary-btn" onClick={() => handleAuthRedirect(true)}>Register Account</button>
+              <button className="hero-btn secondary-btn" onClick={() => handleAuthRedirect(false)}>Already have an account? Login</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         .hero-section {
           padding: 50px 15px;
@@ -100,7 +152,6 @@ const Hero = () => {
           overflow: hidden;
         }
 
-        /* Ambient background lighting effects */
         .hero-glow-bg {
           position: absolute;
           width: 350px;
@@ -111,22 +162,14 @@ const Hero = () => {
           pointer-events: none;
         }
 
-        .glow-1 {
-          top: -100px;
-          left: -100px;
-        }
-
-        .glow-2 {
-          bottom: -100px;
-          right: -100px;
-        }
+        .glow-1 { top: -100px; left: -100px; }
+        .glow-2 { bottom: -100px; right: -100px; }
 
         .hero-content {
           position: relative;
           z-index: 2;
         }
 
-        /* High-end luxury badge */
         .hero-badge {
           display: inline-block;
           padding: 6px 16px;
@@ -171,8 +214,33 @@ const Hero = () => {
           display: flex;
           justify-content: center;
           gap: 15px;
-          margin-bottom: 30px;
+          margin-bottom: 25px;
           flex-wrap: wrap;
+        }
+
+        .hero-general-inquiry {
+          margin-top: 25px;
+          position: relative;
+          z-index: 2;
+        }
+
+        .hero-whatsapp-btn {
+          display: inline-block;
+          padding: 12px 25px;
+          background-color: #25D366;
+          color: #FFFFFF;
+          border-radius: 30px;
+          font-weight: 600;
+          font-size: 0.9rem;
+          text-decoration: none;
+          box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+          transition: all 0.3s ease;
+        }
+
+        .hero-whatsapp-btn:hover {
+          background-color: #20ba5a;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
         }
 
         .hero-btn {
@@ -241,7 +309,6 @@ const Hero = () => {
           box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
         }
 
-        /* Subtle image lighting gradient overlay */
         .hero-img-overlay {
           position: absolute;
           inset: 0;
@@ -309,12 +376,68 @@ const Hero = () => {
           letter-spacing: 0.3px;
         }
 
-        /* Glapgosirimm algorithmic rhythm visual effect */
         .glapgosirimm-pulse {
           border-color: #ffffff;
           background: rgba(30, 30, 30, 0.85);
           box-shadow: 0 0 25px rgba(212, 175, 55, 0.5), inset 0 0 15px rgba(212, 175, 55, 0.2);
           transform: scale(1.015);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background-color: rgba(0, 0, 0, 0.85);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 2000;
+          backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+          background-color: #111111;
+          border: 1px solid #D4AF37;
+          border-radius: 15px;
+          padding: 30px 20px;
+          width: 90%;
+          max-width: 420px;
+          text-align: center;
+          position: relative;
+          box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+        }
+
+        .close-modal-btn {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: transparent;
+          border: none;
+          color: #D4AF37;
+          font-size: 1.2rem;
+          cursor: pointer;
+        }
+
+        .modal-title {
+          color: #D4AF37;
+          margin-bottom: 12px;
+          font-size: 1.3rem;
+        }
+
+        .modal-text {
+          font-size: 0.95rem;
+          opacity: 0.85;
+          margin-bottom: 25px;
+          line-height: 1.5;
+        }
+
+        .modal-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
         }
 
         @media (min-width: 768px) {
