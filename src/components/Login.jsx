@@ -159,9 +159,23 @@ const Login = () => {
 
   const styles = {
     pageContainer: {
-      minHeight: 'calc(100vh - 70px)', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      backgroundImage: `url(${backgrounds[bgIndex]})`, backgroundSize: 'cover', backgroundPosition: 'center',
-      backgroundColor: '#000000', transition: 'background-image 1s ease-in-out', position: 'relative', padding: '20px 16px', boxSizing: 'border-box'
+      minHeight: 'calc(100vh - 70px)', 
+      width: '100vw', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      backgroundImage: `url(${backgrounds[bgIndex]})`, 
+      backgroundSize: 'cover', 
+      backgroundPosition: 'center',
+      backgroundColor: '#000000', 
+      transition: 'background-image 1s ease-in-out', 
+      position: 'relative', 
+      padding: '20px 16px', 
+      boxSizing: 'border-box',
+      left: '50%',
+      right: '50%',
+      marginLeft: '-50vw',
+      marginRight: '-50vw'
     },
     overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 1 },
     cardContainer: {

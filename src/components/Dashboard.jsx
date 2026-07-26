@@ -219,10 +219,16 @@ const Dashboard = () => {
           background-color: #000000;
           color: #FFFFFF;
           min-height: 100vh;
-          padding: 20px 10px;
+          width: 100vw;
+          padding: 20px 16px;
           position: relative;
           box-sizing: border-box;
           padding-bottom: 80px;
+          left: 50%;
+          right: 50%;
+          margin-left: -50vw;
+          margin-right: -50vw;
+          overflow-x: hidden;
         }
 
         .top-bar {

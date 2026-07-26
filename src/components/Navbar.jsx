@@ -173,6 +173,7 @@ const Navbar = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          width: 100vw;
           padding: 18px 6%;
           background-color: rgba(5, 5, 5, 0.85);
           backdrop-filter: blur(16px);
@@ -183,6 +184,11 @@ const Navbar = () => {
           top: 0;
           z-index: 1000;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          box-sizing: border-box;
+          left: 50%;
+          right: 50%;
+          margin-left: -50vw;
+          margin-right: -50vw;
         }
 
         .navbar-scrolled {
@@ -409,7 +415,7 @@ const Navbar = () => {
           position: fixed;
           bottom: 0;
           left: 0;
-          width: 100%;
+          width: 100vw;
           background: rgba(10, 10, 10, 0.95);
           backdrop-filter: blur(12px);
           border-top: 1px solid rgba(212, 175, 55, 0.25);
@@ -418,6 +424,7 @@ const Navbar = () => {
           padding: 10px 0;
           z-index: 999;
           box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+          box-sizing: border-box;
         }
 
         .bottom-nav-item {
