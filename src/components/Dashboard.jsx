@@ -153,7 +153,7 @@ const Dashboard = () => {
 
       <div className="header">
         <h1 className="main-title">Client Dashboard</h1>
-        <p className="sub-title">Explore our signature collections, check specifications, and place orders directly[cite: 1].</p>
+        <p className="sub-title">Explore our signature collections, check specifications, and place orders directly.</p>
         
         {/* Main Category Navigation Tabs[cite: 1] */}
         <div className="nav-tabs">
