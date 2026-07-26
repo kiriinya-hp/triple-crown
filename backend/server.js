@@ -80,7 +80,7 @@ const checkVerified = async (req, res, next) => {
 // ==========================================
 // 3. Products Catalog API Endpoint (Reading from products.json)
 // ==========================================
-app.get('/api/products-catalog', checkVerified, (req, res) => {
+app.get('/api/products-catalog', authenticateToken, (req, res) => {
   try {
     const filePath = path.join(process.cwd(), 'products.json');
     const rawData = fs.readFileSync(filePath, 'utf8');
@@ -92,7 +92,6 @@ app.get('/api/products-catalog', checkVerified, (req, res) => {
     res.status(500).send("Failed to load products catalog from file.");
   }
 });
-
 // ==========================================
 // Secure Client Profile Endpoint
 // ==========================================
