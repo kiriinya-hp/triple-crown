@@ -80,7 +80,10 @@ const checkVerified = async (req, res, next) => {
 // ==========================================
 // 3. Products Catalog API Endpoint (Reading from products.json)
 // ==========================================
-app.get('/api/products-catalog', authenticateToken, (req, res) => {
+// ==========================================
+// 3. Products Catalog API Endpoint (Reading from products.json)
+// ==========================================
+app.get('/api/products-catalog', (req, res) => {
   try {
     const filePath = path.join(process.cwd(), 'products.json');
     const rawData = fs.readFileSync(filePath, 'utf8');
