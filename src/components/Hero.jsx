@@ -27,13 +27,11 @@ const Hero = () => {
     return newIndex;
   };
 
-  // Expanded grid count to 6 display windows for a richer visual layout
   const [windowIndices, setWindowIndices] = useState([0, 1, 2, 3, 4, 0]);
   const [glitchActive, setGlitchActive] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [whatsappUrl, setWhatsappUrl] = useState('');
   
-  // Interactive State Additions
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(null);
   const heroRef = useRef(null);
@@ -60,7 +58,6 @@ const Hero = () => {
     };
   }, []);
 
-  // Advanced mouse tracking for 3D parallax tilt effects
   const handleMouseMove = (e) => {
     if (!heroRef.current) return;
     const rect = heroRef.current.getBoundingClientRect();
@@ -69,7 +66,6 @@ const Hero = () => {
     setMousePos({ x, y });
   };
 
-  // Handler for WhatsApp inquiry with session storage authentication check
   const handleWhatsAppInquiry = (e, inquiryText) => {
     e.preventDefault();
     const loggedInUser = sessionStorage.getItem('user');
@@ -88,7 +84,6 @@ const Hero = () => {
     window.location.href = isRegistering ? '/register' : '/dashboard';
   };
 
-  // Direct dashboard entry handler
   const handleDashboardAccess = (e) => {
     e.preventDefault();
     window.location.href = '/dashboard';
@@ -100,7 +95,6 @@ const Hero = () => {
       onMouseMove={handleMouseMove}
       className="hero-section"
     >
-      {/* Dynamic interactive mouse follower ambient light */}
       <div 
         className="hero-interactive-cursor-glow"
         style={{
@@ -122,7 +116,6 @@ const Hero = () => {
         <p className="hero-description">{description}</p>
         
         <div className="hero-cta-group">
-          {/* Direct access buttons linked to dashboard */}
           <button onClick={handleDashboardAccess} className="hero-btn primary-btn">
             <span>Explore Collection</span>
             <div className="btn-shimmer"></div>
@@ -133,7 +126,6 @@ const Hero = () => {
         </div>
       </div>
       
-      {/* Enhanced multi-window asymmetrical showcase grid */}
       <div className="hero-grid">
         {windowIndices.map((imgIndex, i) => (
           <div 
@@ -189,15 +181,21 @@ const Hero = () => {
 
       <style>{`
         .hero-section {
+          min-height: 100vh;
+          width: 100vw;
+          margin: 0;
           padding: 80px 20px;
           background: radial-gradient(circle at 50% 20%, #1a1a1a 0%, #080808 55%, #000000 100%);
           color: #FFFFFF;
           text-align: center;
-          width: 100%;
           box-sizing: border-box;
           position: relative;
           overflow: hidden;
           perspective: 1200px;
+          left: 50%;
+          right: 50%;
+          margin-left: -50vw;
+          margin-right: -50vw;
         }
 
         .hero-interactive-cursor-glow {
@@ -397,7 +395,6 @@ const Hero = () => {
           box-shadow: 0 10px 25px rgba(212, 175, 55, 0.25);
         }
 
-        /* Upgraded Grid Layout for 6 Interactive Frames */
         .hero-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
@@ -422,7 +419,6 @@ const Hero = () => {
           transform-style: preserve-3d;
         }
 
-        /* Staggered window design heights and float offsets */
         .window-card-2 { animation-delay: 0.8s; }
         .window-card-3 { animation-delay: 1.6s; }
         .window-card-4 { animation-delay: 2.4s; }
