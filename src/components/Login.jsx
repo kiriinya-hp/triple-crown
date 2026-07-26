@@ -26,7 +26,7 @@ const Login = () => {
     return () => clearInterval(interval);
   }, [backgrounds.length]);
 
-  // 1. Handle Regular Login & Store Session Credentials
+  // 1. Handle Regular Login & Store Session Credentials[cite: 2]
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -43,14 +43,14 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         
-        // SAVE SESSION TO LOCALSTORAGE FOR THE DASHBOARD & WHATSAPP GATING
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userEmail', data.user.email);
-        localStorage.setItem('isVerified', data.user.verified ? 'true' : 'false');
+        // SAVE SESSION TO SESSIONSTORAGE FOR THE DASHBOARD & WHATSAPP GATING[cite: 2]
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('userEmail', data.user.email);
+        sessionStorage.setItem('isVerified', data.user.verified ? 'true' : 'false');
         
         const safeUser = { ...data.user };
         delete safeUser.password;
-        localStorage.setItem('user', JSON.stringify(safeUser));
+        sessionStorage.setItem('user', JSON.stringify(safeUser));
         
         navigate('/dashboard');
       } else {

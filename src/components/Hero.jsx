@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const Hero = () => {
   const tagline = "Style that empowers. Beauty that lasts.";
@@ -31,6 +31,11 @@ const Hero = () => {
   const [glitchActive, setGlitchActive] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [whatsappUrl, setWhatsappUrl] = useState('');
+  
+  // Interactive State Additions
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(null);
+  const heroRef = useRef(null);
 
   useEffect(() => {
     const intervals = windowIndices.map((_, i) => {
@@ -54,10 +59,19 @@ const Hero = () => {
     };
   }, []);
 
-  // Handler for WhatsApp inquiry with registration/authentication check
+  // Advanced mouse tracking for 3D parallax tilt effects
+  const handleMouseMove = (e) => {
+    if (!heroRef.current) return;
+    const rect = heroRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setMousePos({ x, y });
+  };
+
+  // Handler for WhatsApp inquiry with session storage authentication check
   const handleWhatsAppInquiry = (e, inquiryText) => {
     e.preventDefault();
-    const loggedInUser = localStorage.getItem('user');
+    const loggedInUser = sessionStorage.getItem('user');
     const targetUrl = `https://wa.me/254799394055?text=${encodeURIComponent(inquiryText)}`;
 
     if (!loggedInUser) {
@@ -70,40 +84,68 @@ const Hero = () => {
 
   const handleAuthRedirect = (isRegistering) => {
     setShowAuthModal(false);
-    // If they choose to login or register, you can also pass them through or directly to dashboard
     window.location.href = isRegistering ? '/register' : '/dashboard';
   };
 
   // Direct dashboard entry handler
   const handleDashboardAccess = (e) => {
     e.preventDefault();
-    // Optional: Auto-set a dummy session token or check user state here if needed
     window.location.href = '/dashboard';
   };
 
   return (
-    <section className="hero-section">
+    <section 
+      ref={heroRef}
+      onMouseMove={handleMouseMove}
+      className="hero-section"
+    >
+      {/* Dynamic interactive mouse follower ambient light */}
+      <div 
+        className="hero-interactive-cursor-glow"
+        style={{
+          transform: `translate(${mousePos.x * 400}px, ${mousePos.y * 400}px)`
+        }}
+      ></div>
+
       <div className="hero-glow-bg glow-1"></div>
       <div className="hero-glow-bg glow-2"></div>
 
       <div className="hero-content">
-        <span className="hero-badge">Exclusive Luxury Collection</span>
+        <span className="hero-badge">
+          <span className="badge-pulse-dot"></span>
+          Exclusive Luxury Collection
+        </span>
         <h1 className="hero-title">Triple Crown Fragrance and Design</h1>
         <p className="hero-tagline">{tagline}</p>
         <p className="hero-description">{description}</p>
         
         <div className="hero-cta-group">
           {/* Direct access buttons linked to dashboard */}
-          <button onClick={handleDashboardAccess} className="hero-btn primary-btn">Explore Collection</button>
-          <button onClick={handleDashboardAccess} className="hero-btn secondary-btn">Discover Fragrances</button>
+          <button onClick={handleDashboardAccess} className="hero-btn primary-btn">
+            <span>Explore Collection</span>
+            <div className="btn-shimmer"></div>
+          </button>
+          <button onClick={handleDashboardAccess} className="hero-btn secondary-btn">
+            <span>Discover Fragrances</span>
+          </button>
         </div>
       </div>
       
       <div className="hero-grid">
         {windowIndices.map((imgIndex, i) => (
-          <div key={i} className="hero-window" style={{ animationDelay: `${i * 0.5}s` }}>
+          <div 
+            key={i} 
+            className={`hero-window ${isHovered === i ? 'window-active-hover' : ''}`}
+            onMouseEnter={() => setIsHovered(i)}
+            onMouseLeave={() => setIsHovered(null)}
+            style={{ 
+              animationDelay: `${i * 0.5}s`,
+              transform: `perspective(1000px) rotateY(${mousePos.x * 12}deg) rotateX(${-mousePos.y * 12}deg)`
+            }}
+          >
             <div className="hero-img-overlay"></div>
             <img src={allImages[imgIndex]} alt="Product showcase" className="hero-img" loading="lazy" />
+            <div className="window-glint"></div>
           </div>
         ))}
       </div>
@@ -123,7 +165,7 @@ const Hero = () => {
           onClick={(e) => handleWhatsAppInquiry(e, "Hello, I would like to inquire for more information regarding Triple Crown Fragrance and Design.")}
           className="hero-whatsapp-btn"
         >
-          💬 Inquire for More Information via WhatsApp
+          <span className="whatsapp-icon-wrapper">💬</span> Inquire for More Information via WhatsApp
         </a>
       </div>
 
@@ -143,28 +185,49 @@ const Hero = () => {
 
       <style>{`
         .hero-section {
-          padding: 50px 15px;
-          background: linear-gradient(135deg, #050505 0%, #000000 50%, #0a0a0a 100%);
+          padding: 60px 20px;
+          background: radial-gradient(circle at 50% 30%, #121212 0%, #050505 60%, #000000 100%);
           color: #FFFFFF;
           text-align: center;
           width: 100%;
           box-sizing: border-box;
           position: relative;
           overflow: hidden;
+          perspective: 1200px;
+        }
+
+        .hero-interactive-cursor-glow {
+          position: absolute;
+          top: 30%;
+          left: 50%;
+          width: 500px;
+          height: 500px;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, rgba(0,0,0,0) 70%);
+          pointer-events: none;
+          transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1);
+          z-index: 1;
+          margin-left: -250px;
+          margin-top: -250px;
         }
 
         .hero-glow-bg {
           position: absolute;
-          width: 350px;
-          height: 350px;
-          background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+          width: 450px;
+          height: 450px;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
           border-radius: 50%;
           z-index: 1;
           pointer-events: none;
+          filter: blur(40px);
         }
 
-        .glow-1 { top: -100px; left: -100px; }
-        .glow-2 { bottom: -100px; right: -100px; }
+        .glow-1 { top: -150px; left: -150px; animation: pulseGlow 8s ease-in-out infinite alternate; }
+        .glow-2 { bottom: -150px; right: -150px; animation: pulseGlow 8s ease-in-out infinite alternate-reverse; }
+
+        @keyframes pulseGlow {
+          0% { transform: scale(1); opacity: 0.6; }
+          100% { transform: scale(1.25); opacity: 1; }
+        }
 
         .hero-content {
           position: relative;
@@ -172,121 +235,168 @@ const Hero = () => {
         }
 
         .hero-badge {
-          display: inline-block;
-          padding: 6px 16px;
-          margin-bottom: 15px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 18px;
+          margin-bottom: 20px;
           font-size: 0.75rem;
           text-transform: uppercase;
           letter-spacing: 2.5px;
-          color: #D4AF37;
-          background: rgba(212, 175, 55, 0.08);
-          border: 1px solid rgba(212, 175, 55, 0.3);
-          border-radius: 20px;
-          box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+          color: #f7e2a0;
+          background: rgba(212, 175, 55, 0.06);
+          border: 1px solid rgba(212, 175, 55, 0.35);
+          border-radius: 30px;
+          box-shadow: 0 0 25px rgba(212, 175, 55, 0.12);
+          backdrop-filter: blur(10px);
+        }
+
+        .badge-pulse-dot {
+          width: 6px;
+          height: 6px;
+          background-color: #D4AF37;
+          border-radius: 50%;
+          box-shadow: 0 0 8px #D4AF37;
+          animation: dotPulse 2s infinite;
+        }
+
+        @keyframes dotPulse {
+          0% { transform: scale(0.95); opacity: 0.5; }
+          50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 12px #D4AF37; }
+          100% { transform: scale(0.95); opacity: 0.5; }
         }
 
         .hero-title {
-          color: #D4AF37;
-          font-size: clamp(2rem, 5vw, 3.8rem);
-          margin: 0 0 10px 0;
+          background: linear-gradient(135deg, #fff 20%, #D4AF37 70%, #aa8c2c 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          font-size: clamp(2.2rem, 5.5vw, 4.2rem);
+          margin: 0 0 12px 0;
           line-height: 1.15;
-          font-weight: 700;
-          text-shadow: 0 2px 20px rgba(212, 175, 55, 0.2);
+          font-weight: 800;
+          letter-spacing: -0.5px;
+          filter: drop-shadow(0 4px 25px rgba(212, 175, 55, 0.25));
         }
 
         .hero-tagline {
           font-style: italic;
-          font-size: 1.1rem;
-          margin-bottom: 15px;
-          color: #f3f3f3;
-          letter-spacing: 0.5px;
+          font-size: 1.15rem;
+          margin-bottom: 18px;
+          color: #e5e5e5;
+          letter-spacing: 0.8px;
+          font-weight: 300;
         }
 
         .hero-description {
-          max-width: 750px;
-          margin: 0 auto 25px auto;
-          line-height: 1.6;
-          font-size: 1rem;
+          max-width: 780px;
+          margin: 0 auto 30px auto;
+          line-height: 1.7;
+          font-size: 1.05rem;
           opacity: 0.85;
-          padding: 0 10px;
+          padding: 0 15px;
+          color: #cccccc;
         }
 
         .hero-cta-group {
           display: flex;
           justify-content: center;
-          gap: 15px;
-          margin-bottom: 25px;
+          gap: 18px;
+          margin-bottom: 30px;
           flex-wrap: wrap;
         }
 
         .hero-general-inquiry {
-          margin-top: 25px;
+          margin-top: 30px;
           position: relative;
           z-index: 2;
         }
 
         .hero-whatsapp-btn {
-          display: inline-block;
-          padding: 12px 25px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 14px 28px;
           background-color: #25D366;
           color: #FFFFFF;
-          border-radius: 30px;
+          border-radius: 35px;
           font-weight: 600;
-          font-size: 0.9rem;
+          font-size: 0.95rem;
           text-decoration: none;
-          box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-          transition: all 0.3s ease;
+          box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .hero-whatsapp-btn:hover {
           background-color: #20ba5a;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+          transform: translateY(-3px) scale(1.02);
+          box-shadow: 0 10px 25px rgba(37, 211, 102, 0.55);
         }
 
         .hero-btn {
-          padding: 13px 30px;
-          border-radius: 30px;
-          font-size: 0.9rem;
+          position: relative;
+          padding: 14px 32px;
+          border-radius: 35px;
+          font-size: 0.95rem;
           font-weight: 600;
           text-decoration: none;
-          transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           cursor: pointer;
           letter-spacing: 0.8px;
+          overflow: hidden;
         }
 
         .primary-btn {
-          background: linear-gradient(135deg, #D4AF37 0%, #aa8c2c 100%);
-          color: #000000;
+          background: linear-gradient(135deg, #f3c643 0%, #D4AF37 50%, #9e8125 100%);
+          color: #050505;
           border: 2px solid #D4AF37;
-          box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+          box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
         }
 
         .primary-btn:hover {
-          background: linear-gradient(135deg, #f3c643 0%, #D4AF37 100%);
-          transform: translateY(-3px);
-          box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 10px 30px rgba(212, 175, 55, 0.55);
+          filter: brightness(1.05);
+        }
+
+        .btn-shimmer {
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(
+            to right,
+            rgba(255,255,255,0) 0%,
+            rgba(255,255,255,0.3) 50%,
+            rgba(255,255,255,0) 100%
+          );
+          transform: rotate(30deg) translateX(-100%);
+          transition: transform 0.6s ease-in-out;
+        }
+
+        .primary-btn:hover .btn-shimmer {
+          transform: rotate(30deg) translateX(100%);
         }
 
         .secondary-btn {
-          background-color: rgba(0, 0, 0, 0.6);
+          background-color: rgba(15, 15, 15, 0.7);
           color: #FFFFFF;
-          border: 2px solid rgba(212, 175, 55, 0.5);
-          backdrop-filter: blur(5px);
+          border: 2px solid rgba(212, 175, 55, 0.4);
+          backdrop-filter: blur(10px);
         }
 
         .secondary-btn:hover {
           border-color: #D4AF37;
-          background-color: rgba(212, 175, 55, 0.12);
-          transform: translateY(-3px);
-          box-shadow: 0 6px 20px rgba(212, 175, 55, 0.2);
+          background-color: rgba(212, 175, 55, 0.15);
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 10px 25px rgba(212, 175, 55, 0.25);
         }
 
         .hero-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
-          padding: 15px 0;
+          gap: 16px;
+          padding: 20px 0;
           max-width: 1200px;
           margin: 0 auto;
           position: relative;
@@ -294,26 +404,41 @@ const Hero = () => {
         }
 
         .hero-window {
-          height: 180px;
-          border-radius: 14px;
-          border: 2px solid rgba(212, 175, 55, 0.6);
+          height: 200px;
+          border-radius: 16px;
+          border: 2px solid rgba(212, 175, 55, 0.4);
           overflow: hidden;
           position: relative;
-          animation: floatTranslate 4s ease-in-out infinite;
+          animation: floatTranslate 5s ease-in-out infinite;
           background: #111;
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+          transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease-out;
+          transform-style: preserve-3d;
         }
 
         .hero-window:hover {
           border-color: #D4AF37;
-          box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+          box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+          z-index: 10;
+        }
+
+        .window-glint {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          pointer-events: none;
+        }
+
+        .hero-window:hover .window-glint {
+          opacity: 1;
         }
 
         .hero-img-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 60%);
+          background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
           z-index: 1;
           pointer-events: none;
         }
@@ -322,33 +447,33 @@ const Hero = () => {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .hero-window:hover .hero-img {
-          transform: scale(1.05);
+          transform: scale(1.08);
         }
 
         @keyframes floatTranslate { 
-          0%, 100% { transform: translateY(0px); } 
-          50% { transform: translateY(-8px); } 
+          0%, 100% { transform: translateY(0px) rotate(0deg); } 
+          50% { transform: translateY(-10px) rotate(0.5deg); } 
         }
 
         .org-details-bar {
           display: flex;
           justify-content: center;
           align-items: center;
-          gap: 20px;
+          gap: 24px;
           flex-wrap: wrap;
-          margin: 35px auto 10px auto;
+          margin: 40px auto 10px auto;
           max-width: 950px;
-          padding: 18px 20px;
-          background: rgba(15, 15, 15, 0.7);
-          backdrop-filter: blur(10px);
-          border-top: 1px solid rgba(212, 175, 55, 0.3);
-          border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-          border-radius: 12px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+          padding: 20px 24px;
+          background: rgba(12, 12, 12, 0.8);
+          backdrop-filter: blur(15px);
+          border-top: 1px solid rgba(212, 175, 55, 0.35);
+          border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+          border-radius: 16px;
+          box-shadow: 0 15px 35px rgba(0,0,0,0.6);
           position: relative;
           z-index: 2;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -358,7 +483,18 @@ const Hero = () => {
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 0 12px;
+          padding: 0 14px;
+          position: relative;
+        }
+
+        .org-detail-item:not(:last-child):after {
+          content: '';
+          position: absolute;
+          right: -12px;
+          top: 20%;
+          height: 60%;
+          width: 1px;
+          background: rgba(212, 175, 55, 0.2);
         }
 
         .org-detail-label {
@@ -367,11 +503,11 @@ const Hero = () => {
           letter-spacing: 1.5px;
           color: #D4AF37;
           opacity: 0.9;
-          margin-bottom: 3px;
+          margin-bottom: 4px;
         }
 
         .org-detail-value {
-          font-size: 0.95rem;
+          font-size: 1rem;
           color: #ffffff;
           font-weight: 600;
           letter-spacing: 0.3px;
@@ -379,9 +515,9 @@ const Hero = () => {
 
         .glapgosirimm-pulse {
           border-color: #ffffff;
-          background: rgba(30, 30, 30, 0.85);
-          box-shadow: 0 0 25px rgba(212, 175, 55, 0.5), inset 0 0 15px rgba(212, 175, 55, 0.2);
-          transform: scale(1.015);
+          background: rgba(25, 25, 25, 0.9);
+          box-shadow: 0 0 35px rgba(212, 175, 55, 0.6), inset 0 0 20px rgba(212, 175, 55, 0.25);
+          transform: scale(1.02);
         }
 
         .modal-overlay {
@@ -395,43 +531,68 @@ const Hero = () => {
           align-items: center;
           justify-content: center;
           z-index: 2000;
-          backdrop-filter: blur(5px);
+          backdrop-filter: blur(8px);
+          animation: fadeInModal 0.3s ease;
+        }
+
+        @keyframes fadeInModal {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
 
         .modal-content {
-          background-color: #111111;
+          background-color: #121212;
           border: 1px solid #D4AF37;
-          border-radius: 15px;
-          padding: 30px 20px;
+          border-radius: 18px;
+          padding: 35px 25px;
           width: 90%;
-          max-width: 420px;
+          max-width: 440px;
           text-align: center;
           position: relative;
-          box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+          box-shadow: 0 20px 50px rgba(212, 175, 55, 0.25);
+          animation: scaleUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes scaleUpModal {
+          from { transform: scale(0.9); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
         }
 
         .close-modal-btn {
           position: absolute;
-          top: 12px;
-          right: 12px;
-          background: transparent;
+          top: 14px;
+          right: 14px;
+          background: rgba(255,255,255,0.05);
           border: none;
           color: #D4AF37;
-          font-size: 1.2rem;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1rem;
           cursor: pointer;
+          transition: background 0.2s;
+        }
+
+        .close-modal-btn:hover {
+          background: rgba(212, 175, 55, 0.2);
         }
 
         .modal-title {
           color: #D4AF37;
           margin-bottom: 12px;
-          font-size: 1.3rem;
+          font-size: 1.4rem;
+          font-weight: 700;
         }
 
         .modal-text {
           font-size: 0.95rem;
           opacity: 0.85;
           margin-bottom: 25px;
-          line-height: 1.5;
+          line-height: 1.6;
+          color: #e0e0e0;
         }
 
         .modal-actions {
@@ -442,24 +603,24 @@ const Hero = () => {
 
         @media (min-width: 768px) {
           .hero-section {
-            padding: 70px 5%;
+            padding: 80px 5%;
           }
           .org-details-bar {
             gap: 35px;
-            margin-top: 45px;
+            margin-top: 50px;
           }
           .hero-grid {
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
+            gap: 22px;
           }
           .hero-window {
-            height: 300px;
+            height: 320px;
           }
           .hero-tagline {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
           }
           .hero-description {
-            font-size: 1.05rem;
+            font-size: 1.1rem;
           }
         }
       `}</style>

@@ -4,15 +4,18 @@ const Dashboard = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [productsData, setProductsData] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
-  const [clientProfile, setClientProfile] = useState(null);
+  const [clientProfile, setClientProfile] = useState(() => {
+    const cachedUser = sessionStorage.getItem('user');
+    return cachedUser ? JSON.parse(cachedUser) : null;
+  });
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userEmail = localStorage.getItem('userEmail');
+    const token = sessionStorage.getItem('token');
+    const userEmail = sessionStorage.getItem('userEmail');
 
-    // 1. Fetch products catalog from backend (public or verified)
+    // 1. Fetch products catalog from backend (public or verified)[cite: 1]
     fetch('https://triple-crown-4a9k.onrender.com/api/products-catalog', {
       method: 'GET',
       headers: {
@@ -34,7 +37,7 @@ const Dashboard = () => {
         setErrorMsg(err.message);
       });
 
-    // 2. Fetch secure client profile details directly from database via backend API
+    // 2. Fetch secure client profile details directly from database via backend API[cite: 1]
     if (token) {
       fetch('https://triple-crown-4a9k.onrender.com/api/client-profile', {
         method: 'GET',
@@ -51,6 +54,7 @@ const Dashboard = () => {
         })
         .then((data) => {
           setClientProfile(data);
+          sessionStorage.setItem('user', JSON.stringify(data));
         })
         .catch((err) => {
           console.error("Profile fetch error:", err);
@@ -58,14 +62,14 @@ const Dashboard = () => {
     }
   }, []);
 
-  // Handler for WhatsApp inquiry with restricted access check
+  // Handler for WhatsApp inquiry with restricted access check[cite: 1]
   const handleWhatsAppInquiry = (e, inquiryText) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    const isEmailVerified = localStorage.getItem('isVerified') === 'true'; 
+    const token = sessionStorage.getItem('token');
+    const isEmailVerified = sessionStorage.getItem('isVerified') === 'true'; 
     const targetUrl = `https://wa.me/254799394055?text=${encodeURIComponent(inquiryText)}`;
 
-    // Limit access if the user lacks a valid token or is unverified
+    // Limit access if the user lacks a token or is unverified[cite: 1]
     if (!token || !isEmailVerified) {
       setShowAuthModal(true); 
     } else {
@@ -78,11 +82,9 @@ const Dashboard = () => {
     window.location.href = isRegistering ? '/register' : '/login';
   };
 
-  // Handler for logging out the user
+  // Handler for logging out the user[cite: 1]
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('isVerified');
+    sessionStorage.clear();
     window.location.href = '/login';
   };
 
@@ -95,7 +97,7 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      {/* Top Bar with Profile and Logout Icons */}
+      {/* Top Bar with Profile and Logout Icons[cite: 1] */}
       <div className="top-bar">
         <div className="top-bar-actions">
           <button 
@@ -115,7 +117,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Client Profile Modal */}
+      {/* Client Profile Modal[cite: 1] */}
       {showProfileModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -123,8 +125,8 @@ const Dashboard = () => {
             <h2 className="modal-title">Client Profile</h2>
             {clientProfile ? (
               <div className="profile-details">
-                <p><strong>Name:</strong> {clientProfile.name || 'N/A'}</p>
-                <p><strong>Email:</strong> {clientProfile.email || 'N/A'}</p>
+                <p><strong>Name:</strong> {clientProfile.name || clientProfile.username || 'N/A'}</p>
+                <p><strong>Email:</strong> {clientProfile.email || sessionStorage.getItem('userEmail') || 'N/A'}</p>
                 <p><strong>Phone:</strong> {clientProfile.phone || 'N/A'}</p>
               </div>
             ) : (
@@ -134,7 +136,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Authentication / Registration Restriction Modal */}
+      {/* Authentication / Registration Restriction Modal[cite: 1] */}
       {showAuthModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -151,9 +153,9 @@ const Dashboard = () => {
 
       <div className="header">
         <h1 className="main-title">Client Dashboard</h1>
-        <p className="sub-title">Explore our signature collections, check specifications, and place orders directly.</p>
+        <p className="sub-title">Explore our signature collections, check specifications, and place orders directly[cite: 1].</p>
         
-        {/* Main Category Navigation Tabs */}
+        {/* Main Category Navigation Tabs[cite: 1] */}
         <div className="nav-tabs">
           <button className={`tab-button ${activeCategory === 'all' ? 'active' : ''}`} onClick={() => setActiveCategory('all')}>All</button>
           <button className={`tab-button ${activeCategory === 'perfumes' ? 'active' : ''}`} onClick={() => setActiveCategory('perfumes')}>Perfumes</button>
@@ -162,7 +164,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Render Filtered Categories & Sub-titles */}
+      {/* Render Filtered Categories & Sub-titles[cite: 1] */}
       {categoriesToDisplay.map((catKey) => {
         const category = productsData[catKey];
         if (!category) return null;
@@ -171,7 +173,7 @@ const Dashboard = () => {
             {activeCategory === 'all' && <h2 className="main-category-heading">{category.title || catKey}</h2>}
             <p className="section-sub-heading">{category.subtitle}</p>
 
-            {/* Loop through Sub-titles / Sub-categories */}
+            {/* Loop through Sub-titles / Sub-categories[cite: 1] */}
             {Object.keys(category.subCategories).map((subKey) => (
               <div key={subKey}>
                 <h3 className="sub-category-heading">{subKey}</h3>
@@ -204,7 +206,7 @@ const Dashboard = () => {
         );
       })}
 
-      {/* Direct Order Help Banner */}
+      {/* Direct Order Help Banner[cite: 1] */}
       <div className="contact-banner">
         <h3 className="banner-title">Need Assistance with Pricing or Deliveries?</h3>
         <p className="banner-text">Contact our agents directly:</p>
@@ -237,7 +239,7 @@ const Dashboard = () => {
 
         .profile-icon-btn, .logout-icon-btn {
           background-color: transparent;
-          border: 1px solid #D4AF37;
+          border: 1.5px solid #D4AF37;
           border-radius: 50%;
           width: 40px;
           height: 40px;
