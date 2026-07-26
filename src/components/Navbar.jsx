@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Handle sticky blur effect on scroll & read session storage
   useEffect(() => {
@@ -54,34 +53,31 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  const isActive = (path) => location.pathname === path;
-
   return (
     <>
       <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
         <div className="nav-brand-wrapper">
           <Link to="/" className="nav-logo" onClick={closeMenu}>
-            {/* Integrated the uploaded custom logo image file */}
-            <div className="logo-image-container">
-              <img src="/logo.jpeg" alt="Triple Crown Fragrance and Design Logo" className="brand-logo-img" />
-            </div>
+            <span className="logo-icon">👑</span>
+            <span className="logo-text">TRIPLE CROWN</span>
           </Link>
+          <span className="nav-subtitle-tag">Luxury & Design</span>
         </div>
         
         {/* Desktop Links with Luxury Hover Indicators & Session State */}
         <div className="link-container">
-          <Link to="/" className={`nav-link ${isActive('/') ? 'active-link' : ''}`}>
+          <Link to="/" className="nav-link">
             <span>Home</span>
             <div className="link-glint"></div>
           </Link>
-          <Link to="/about" className={`nav-link ${isActive('/about') ? 'active-link' : ''}`}>
+          <Link to="/about" className="nav-link">
             <span>About</span>
             <div className="link-glint"></div>
           </Link>
           
           {user ? (
             <>
-              <Link to="/dashboard" className={`nav-link nav-dashboard-pill ${isActive('/dashboard') ? 'active-pill' : ''}`}>
+              <Link to="/dashboard" className="nav-link nav-dashboard-pill">
                 <span>Dashboard</span>
               </Link>
               <button onClick={handleLogout} className="nav-auth-btn nav-logout-btn">
@@ -90,7 +86,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/login" className={`nav-link ${isActive('/login') ? 'active-link' : ''}`}>
+              <Link to="/login" className="nav-link">
                 <span>Login</span>
                 <div className="link-glint"></div>
               </Link>
@@ -115,22 +111,21 @@ const Navbar = () => {
       <div className={`mobile-drawer ${isOpen ? 'open' : ''}`}>
         <div className="drawer-header">
           <div className="drawer-brand">
-            <img src="/logo.jpeg" alt="Logo" className="drawer-logo-img" />
-            <span>TRIPLE CROWN</span>
+            <span>👑</span> TRIPLE CROWN
           </div>
           <button className="close-btn" onClick={closeMenu}>&times;</button>
         </div>
         <div className="drawer-links">
-          <Link to="/" className={`drawer-link ${isActive('/') ? 'drawer-highlight' : ''}`} onClick={closeMenu}>
+          <Link to="/" className="drawer-link" onClick={closeMenu}>
             <span className="drawer-icon">🏠</span> Home
           </Link>
-          <Link to="/about" className={`drawer-link ${isActive('/about') ? 'drawer-highlight' : ''}`} onClick={closeMenu}>
+          <Link to="/about" className="drawer-link" onClick={closeMenu}>
             <span className="drawer-icon">ℹ️</span> About
           </Link>
           
           {user ? (
             <>
-              <Link to="/dashboard" className={`drawer-link ${isActive('/dashboard') ? 'drawer-highlight' : ''}`} onClick={closeMenu}>
+              <Link to="/dashboard" className="drawer-link" onClick={closeMenu}>
                 <span className="drawer-icon">📊</span> Dashboard
               </Link>
               <button onClick={handleLogout} className="drawer-auth-action logout-action">
@@ -139,10 +134,10 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/login" className={`drawer-link ${isActive('/login') ? 'drawer-highlight' : ''}`} onClick={closeMenu}>
+              <Link to="/login" className="drawer-link" onClick={closeMenu}>
                 <span className="drawer-icon">🔑</span> Login
               </Link>
-              <Link to="/register" className={`drawer-link drawer-highlight`} onClick={closeMenu}>
+              <Link to="/register" className="drawer-link drawer-highlight" onClick={closeMenu}>
                 <span className="drawer-icon">✨</span> Register Account
               </Link>
             </>
@@ -150,54 +145,27 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Ultra-Modern iOS/Android Inspired Floating Bottom Dock with Minimalist SVG Icons & Pill Active Indicator */}
-      <div className="mobile-bottom-nav-container">
-        <div className="mobile-bottom-nav">
-          <Link to="/" className={`bottom-nav-item ${isActive('/') ? 'active-bottom-item' : ''}`} onClick={closeMenu}>
-            <div className="bottom-icon-bubble">
-              <svg className="bottom-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-              </svg>
-            </div>
-            <span className="bottom-label">Home</span>
+      {/* Mobile App-like Bottom Navigation Bar */}
+      <div className="mobile-bottom-nav">
+        <Link to="/" className="bottom-nav-item" onClick={closeMenu}>
+          <span>🏠</span>
+          <span>Home</span>
+        </Link>
+        <Link to="/about" className="bottom-nav-item" onClick={closeMenu}>
+          <span>ℹ️</span>
+          <span>About</span>
+        </Link>
+        {user ? (
+          <Link to="/dashboard" className="bottom-nav-item" onClick={closeMenu}>
+            <span>📊</span>
+            <span>Dashboard</span>
           </Link>
-
-          <Link to="/about" className={`bottom-nav-item ${isActive('/about') ? 'active-bottom-item' : ''}`} onClick={closeMenu}>
-            <div className="bottom-icon-bubble">
-              <svg className="bottom-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="16" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12.01" y2="8"/>
-              </svg>
-            </div>
-            <span className="bottom-label">About</span>
+        ) : (
+          <Link to="/login" className="bottom-nav-item" onClick={closeMenu}>
+            <span>👤</span>
+            <span>Account</span>
           </Link>
-
-          {user ? (
-            <Link to="/dashboard" className={`bottom-nav-item ${isActive('/dashboard') ? 'active-bottom-item' : ''}`} onClick={closeMenu}>
-              <div className="bottom-icon-bubble">
-                <svg className="bottom-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="7" height="7" rx="1"/>
-                  <rect x="14" y="3" width="7" height="7" rx="1"/>
-                  <rect x="14" y="14" width="7" height="7" rx="1"/>
-                  <rect x="3" y="14" width="7" height="7" rx="1"/>
-                </svg>
-              </div>
-              <span className="bottom-label">Dashboard</span>
-            </Link>
-          ) : (
-            <Link to="/login" className={`bottom-nav-item ${isActive('/login') ? 'active-bottom-item' : ''}`} onClick={closeMenu}>
-              <div className="bottom-icon-bubble">
-                <svg className="bottom-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-              </div>
-              <span className="bottom-label">Account</span>
-            </Link>
-          )}
-        </div>
+        )}
       </div>
 
       <style>{`
@@ -205,7 +173,7 @@ const Navbar = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 14px 6%;
+          padding: 18px 6%;
           background-color: rgba(5, 5, 5, 0.85);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
@@ -218,7 +186,7 @@ const Navbar = () => {
         }
 
         .navbar-scrolled {
-          padding: 10px 6%;
+          padding: 12px 6%;
           background-color: rgba(2, 2, 2, 0.95);
           border-bottom: 1px solid rgba(212, 175, 55, 0.45);
           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
@@ -226,13 +194,22 @@ const Navbar = () => {
 
         .nav-brand-wrapper {
           display: flex;
-          align-items: center;
+          flex-direction: column;
+          align-items: flex-start;
         }
 
         .nav-logo {
           display: flex;
           align-items: center;
+          gap: 8px;
           text-decoration: none;
+          font-size: 1.35rem;
+          font-weight: 800;
+          letter-spacing: 2.5px;
+          background: linear-gradient(135deg, #fff 30%, #D4AF37 80%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 2px 10px rgba(212, 175, 55, 0.3));
           transition: transform 0.3s ease;
         }
 
@@ -240,25 +217,20 @@ const Navbar = () => {
           transform: scale(1.02);
         }
 
-        .logo-image-container {
-          height: 48px;
-          display: flex;
-          align-items: center;
+        .logo-icon {
+          font-size: 1.1rem;
+          filter: none;
+          -webkit-text-fill-color: initial;
         }
 
-        .brand-logo-img {
-          height: 100%;
-          width: auto;
-          object-fit: contain;
-          filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.35));
-          border-radius: 6px;
-        }
-
-        .drawer-logo-img {
-          height: 36px;
-          width: auto;
-          object-fit: contain;
-          border-radius: 4px;
+        .nav-subtitle-tag {
+          font-size: 0.55rem;
+          text-transform: uppercase;
+          letter-spacing: 3px;
+          color: #D4AF37;
+          opacity: 0.8;
+          margin-top: -2px;
+          margin-left: 2px;
         }
 
         .link-container {
@@ -347,18 +319,18 @@ const Navbar = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 20px 24px;
+          padding: 24px;
           border-bottom: 1px solid rgba(255, 255, 255, 0.08);
           color: #D4AF37;
           font-weight: 700;
-          font-size: 1rem;
+          font-size: 1.1rem;
         }
 
         .drawer-brand {
           display: flex;
           align-items: center;
-          gap: 10px;
-          letter-spacing: 1px;
+          gap: 8px;
+          letter-spacing: 1.5px;
         }
 
         .close-btn {
@@ -392,7 +364,7 @@ const Navbar = () => {
           text-decoration: none;
           font-size: 1.05rem;
           padding: 12px 16px;
-          border-radius: 12px;
+          border-radius: 10px;
           background: rgba(255, 255, 255, 0.02);
           border: 1px solid rgba(255, 255, 255, 0.04);
           display: flex;
@@ -417,7 +389,7 @@ const Navbar = () => {
         .drawer-auth-action {
           margin-top: 10px;
           padding: 14px;
-          border-radius: 12px;
+          border-radius: 10px;
           border: none;
           font-weight: 600;
           font-size: 1rem;
@@ -433,100 +405,49 @@ const Navbar = () => {
           background: rgba(255, 50, 50, 0.25);
         }
 
-        /* Ultra-Modern Floating Bottom Nav Bar */
-        .mobile-bottom-nav-container {
+        .mobile-bottom-nav {
           position: fixed;
-          bottom: 18px;
+          bottom: 0;
           left: 0;
           width: 100%;
-          display: flex;
-          justify-content: center;
-          z-index: 999;
-          pointer-events: none;
-          padding: 0 16px;
-        }
-
-        .mobile-bottom-nav {
-          pointer-events: auto;
-          background: rgba(12, 12, 12, 0.9);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(212, 175, 55, 0.35);
+          background: rgba(10, 10, 10, 0.95);
+          backdrop-filter: blur(12px);
+          border-top: 1px solid rgba(212, 175, 55, 0.25);
           display: flex;
           justify-content: space-around;
-          align-items: center;
-          width: 100%;
-          max-width: 360px;
-          padding: 6px 8px;
-          border-radius: 40px;
-          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(212, 175, 55, 0.12);
+          padding: 10px 0;
+          z-index: 999;
+          box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
 
         .bottom-nav-item {
           display: flex;
           flex-direction: column;
           align-items: center;
-          color: #8c8c8c;
+          color: #b0b0b0;
           text-decoration: none;
-          gap: 2px;
-          padding: 6px 12px;
-          border-radius: 30px;
-          transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-          position: relative;
+          font-size: 0.7rem;
+          gap: 3px;
+          transition: color 0.2s;
         }
 
-        .bottom-icon-bubble {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          transition: all 0.3s ease;
+        .bottom-nav-item span:first-child {
+          font-size: 1.25rem;
         }
 
-        .bottom-svg-icon {
-          width: 20px;
-          height: 20px;
-          transition: transform 0.3s ease;
-        }
-
-        .bottom-label {
-          font-size: 0.6rem;
-          font-weight: 500;
-          letter-spacing: 0.3px;
-          opacity: 0.85;
-          transition: opacity 0.3s ease;
-        }
-
-        .bottom-nav-item:hover {
+        .bottom-nav-item:hover, .bottom-nav-item:active {
           color: #D4AF37;
-        }
-
-        .active-bottom-item {
-          color: #D4AF37;
-          background: rgba(212, 175, 55, 0.14);
-        }
-
-        .active-bottom-item .bottom-icon-bubble {
-          background: rgba(212, 175, 55, 0.2);
-          box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
-        }
-
-        .active-bottom-item .bottom-svg-icon {
-          transform: scale(1.1);
-          filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6));
         }
 
         @media (min-width: 768px) {
-          .hamburger-btn, .mobile-drawer, .mobile-overlay, .mobile-bottom-nav-container {
+          .hamburger-btn, .mobile-drawer, .mobile-overlay, .mobile-bottom-nav {
             display: none !important;
           }
           
           .link-container {
             display: flex;
             align-items: center;
-            gap: 28px;
+            gap: 30px;
           }
 
           .nav-link {
@@ -540,7 +461,7 @@ const Navbar = () => {
             transition: color 0.3s ease;
           }
 
-          .nav-link:hover, .active-link {
+          .nav-link:hover {
             color: #D4AF37;
           }
 
@@ -556,7 +477,7 @@ const Navbar = () => {
             box-shadow: 0 0 8px #D4AF37;
           }
 
-          .nav-link:hover::after, .active-link::after {
+          .nav-link:hover::after {
             width: 100%;
           }
 
@@ -573,9 +494,9 @@ const Navbar = () => {
             display: none;
           }
 
-          .nav-dashboard-pill:hover, .active-pill {
-            background: rgba(212, 175, 55, 0.22) !important;
-            border-color: #D4AF37 !important;
+          .nav-dashboard-pill:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #D4AF37;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(212, 175, 55, 0.25);
           }
