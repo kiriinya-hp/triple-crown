@@ -9,11 +9,16 @@ const Dashboard = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
-    // 1. Fetch products catalog from backend
+    const token = localStorage.getItem('token');
+    const userEmail = localStorage.getItem('userEmail');
+
+    // 1. Fetch products catalog from backend with proper headers matching checkVerified middleware
     fetch('https://triple-crown-4a9k.onrender.com/api/products-catalog', {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'user-email': userEmail
       }
     })
       .then(async (res) => {
@@ -30,8 +35,6 @@ const Dashboard = () => {
       });
 
     // 2. Fetch secure client profile details directly from database via backend API
-    // Instead of relying on vulnerable client-side localStorage which is exposed in F12 dev tools.
-    const token = localStorage.getItem('token'); // Secure session token or JWT
     if (token) {
       fetch('https://triple-crown-4a9k.onrender.com/api/client-profile', {
         method: 'GET',
