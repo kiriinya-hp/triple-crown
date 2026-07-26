@@ -9,9 +9,8 @@ const Dashboard = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
-    // Read secure session tokens from sessionStorage instead of localStorage
-    const token = sessionStorage.getItem('token');
-    const userEmail = sessionStorage.getItem('userEmail');
+    const token = localStorage.getItem('token');
+    const userEmail = localStorage.getItem('userEmail');
 
     // 1. Fetch products catalog from backend (public or verified)
     fetch('https://triple-crown-4a9k.onrender.com/api/products-catalog', {
@@ -59,11 +58,11 @@ const Dashboard = () => {
     }
   }, []);
 
-  // Handler for WhatsApp inquiry with restricted access check using sessionStorage
+  // Handler for WhatsApp inquiry with restricted access check
   const handleWhatsAppInquiry = (e, inquiryText) => {
     e.preventDefault();
-    const token = sessionStorage.getItem('token');
-    const isEmailVerified = sessionStorage.getItem('isVerified') === 'true'; 
+    const token = localStorage.getItem('token');
+    const isEmailVerified = localStorage.getItem('isVerified') === 'true'; 
     const targetUrl = `https://wa.me/254799394055?text=${encodeURIComponent(inquiryText)}`;
 
     // Limit access if the user lacks a valid token or is unverified
@@ -79,12 +78,11 @@ const Dashboard = () => {
     window.location.href = isRegistering ? '/register' : '/login';
   };
 
-  // Handler for logging out the user from sessionStorage
+  // Handler for logging out the user
   const handleLogout = () => {
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('userEmail');
-    sessionStorage.removeItem('isVerified');
-    sessionStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('isVerified');
     window.location.href = '/login';
   };
 
