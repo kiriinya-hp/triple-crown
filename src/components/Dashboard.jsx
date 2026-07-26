@@ -6,22 +6,14 @@ const Dashboard = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [clientProfile, setClientProfile] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
-    // Retrieve the logged-in user details to pass email header for verification & profile info
-    const loggedInUser = JSON.parse(localStorage.getItem('user'));
-    const userEmail = loggedInUser ? loggedInUser.email : '';
-    
-    if (loggedInUser) {
-      setClientProfile(loggedInUser);
-    }
-
-    // Pointing directly to your Render backend deployment (with localhost fallback option)
+    // 1. Fetch products catalog from backend
     fetch('https://triple-crown-4a9k.onrender.com/api/products-catalog', {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'user-email': userEmail
+        'Content-Type': 'application/json'
       }
     })
       .then(async (res) => {
@@ -36,7 +28,52 @@ const Dashboard = () => {
         console.error("Error loading products data:", err);
         setErrorMsg(err.message);
       });
+
+    // 2. Fetch secure client profile details directly from database via backend API
+    // Instead of relying on vulnerable client-side localStorage which is exposed in F12 dev tools.
+    const token = localStorage.getItem('token'); // Secure session token or JWT
+    if (token) {
+      fetch('https://triple-crown-4a9k.onrender.com/api/client-profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            throw new Error("Failed to fetch secure client profile");
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setClientProfile(data);
+        })
+        .catch((err) => {
+          console.error("Profile fetch error:", err);
+        });
+    }
   }, []);
+
+  // Handler for WhatsApp inquiry with restricted access check
+  const handleWhatsAppInquiry = (e, inquiryText) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    const isEmailVerified = localStorage.getItem('isVerified') === 'true'; 
+    const targetUrl = `https://wa.me/254799394055?text=${encodeURIComponent(inquiryText)}`;
+
+    // Limit access if the user lacks a valid token or is unverified
+    if (!token || !isEmailVerified) {
+      setShowAuthModal(true); 
+    } else {
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleAuthRedirect = (isRegistering) => {
+    setShowAuthModal(false);
+    window.location.href = isRegistering ? '/register' : '/login';
+  };
 
   if (errorMsg) return <div className="error-text">Access Error: {errorMsg}</div>;
   if (!productsData) return <div className="loading-text">Loading Dashboard...</div>;
@@ -71,8 +108,23 @@ const Dashboard = () => {
                 <p><strong>Phone:</strong> {clientProfile.phone || 'N/A'}</p>
               </div>
             ) : (
-              <p>No client details found in local storage.</p>
+              <p>Loading secure profile details from database...</p>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Authentication / Registration Restriction Modal */}
+      {showAuthModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button className="close-modal-btn" onClick={() => setShowAuthModal(false)}>✕</button>
+            <h3 className="modal-title">Email Verification Required</h3>
+            <p className="modal-text">You must verify your email or log into an authorized account to place orders or make WhatsApp inquiries.</p>
+            <div className="modal-actions">
+              <button className="hero-btn primary-btn" onClick={() => handleAuthRedirect(true)}>Register / Verify Account</button>
+              <button className="hero-btn secondary-btn" onClick={() => handleAuthRedirect(false)}>Login to Existing Account</button>
+            </div>
           </div>
         </div>
       )}
@@ -116,9 +168,8 @@ const Dashboard = () => {
                           <p className="item-price">{item.price !== "Inquire" ? item.price : ""}</p>
                         </div>
                         <a 
-                          href={`https://wa.me/254799394055?text=Hello,%20I%20would%20like%20to%20inquire%20about%20${encodeURIComponent(item.name)}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
+                          href="#whatsapp" 
+                          onClick={(e) => handleWhatsAppInquiry(e, `Hello, I would like to inquire about ${item.name}`)}
                           className="order-button"
                         >
                           Inquire / Order via WhatsApp
@@ -149,7 +200,7 @@ const Dashboard = () => {
           padding: 20px 10px;
           position: relative;
           box-sizing: border-box;
-          padding-bottom: 80px; /* Space for mobile bottom bar */
+          padding-bottom: 80px;
         }
 
         .top-bar {
@@ -161,11 +212,11 @@ const Dashboard = () => {
         .profile-icon-btn {
           background-color: transparent;
           border: 1px solid #D4AF37;
-          borderRadius: 50%;
+          border-radius: 50%;
           width: 40px;
           height: 40px;
           color: #D4AF37;
-          fontSize: 1.1rem;
+          font-size: 1.1rem;
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -179,22 +230,24 @@ const Dashboard = () => {
           left: 0;
           width: 100vw;
           height: 100vh;
-          background-color: rgba(0, 0, 0, 0.8);
+          background-color: rgba(0, 0, 0, 0.85);
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 2000;
+          backdrop-filter: blur(5px);
         }
 
         .modal-content {
-          backgroundColor: #111111;
+          background-color: #111111;
           border: 1px solid #D4AF37;
-          borderRadius: 15px;
-          padding: 25px 20px;
+          border-radius: 15px;
+          padding: 30px 20px;
           width: 90%;
-          maxWidth: 400px;
-          textAlign: center;
+          max-width: 420px;
+          text-align: center;
           position: relative;
+          box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
         }
 
         .close-modal-btn {
@@ -204,14 +257,27 @@ const Dashboard = () => {
           background: transparent;
           border: none;
           color: #D4AF37;
-          fontSize: 1.2rem;
+          font-size: 1.2rem;
           cursor: pointer;
         }
 
         .modal-title {
           color: #D4AF37;
-          margin-bottom: 15px;
+          margin-bottom: 12px;
           font-size: 1.3rem;
+        }
+
+        .modal-text {
+          font-size: 0.95rem;
+          opacity: 0.85;
+          margin-bottom: 25px;
+          line-height: 1.5;
+        }
+
+        .modal-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
         }
 
         .profile-details {
@@ -232,7 +298,7 @@ const Dashboard = () => {
         }
 
         .sub-title {
-          fontSize: 0.95rem;
+          font-size: 0.95rem;
           opacity: 0.8;
           margin-bottom: 20px;
           padding: 0 10px;
@@ -249,7 +315,7 @@ const Dashboard = () => {
 
         .tab-button {
           padding: 8px 18px;
-          borderRadius: 20px;
+          border-radius: 20px;
           border: 1px solid #D4AF37;
           background-color: transparent;
           color: #FFFFFF;
@@ -285,13 +351,12 @@ const Dashboard = () => {
         }
 
         .section-sub-heading {
-          fontSize: 0.9rem;
+          font-size: 0.9rem;
           opacity: 0.7;
           margin-bottom: 15px;
           font-style: italic;
         }
 
-        /* Strict 2-column mobile grid matching Jumia & Kilimall layout */
         .product-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
@@ -299,9 +364,9 @@ const Dashboard = () => {
         }
 
         .product-card {
-          backgroundColor: rgba(255, 255, 255, 0.03);
+          background-color: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.1);
-          borderRadius: 12px;
+          border-radius: 12px;
           overflow: hidden;
           display: flex;
           flex-direction: column;
@@ -312,7 +377,7 @@ const Dashboard = () => {
           height: 150px;
           overflow: hidden;
           position: relative;
-          backgroundColor: #121212;
+          background-color: #121212;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -335,8 +400,8 @@ const Dashboard = () => {
         }
 
         .item-name {
-          fontSize: 0.85rem;
-          fontWeight: bold;
+          font-size: 0.85rem;
+          font-weight: bold;
           margin-bottom: 4px;
           color: #FFF;
           display: -webkit-box;
@@ -346,76 +411,101 @@ const Dashboard = () => {
         }
 
         .item-type {
-          fontSize: 0.75rem;
+          font-size: 0.75rem;
           opacity: 0.8;
           margin-bottom: 6px;
           color: #D4AF37;
         }
 
         .item-price {
-          fontSize: 0.85rem;
-          fontWeight: bold;
+          font-size: 0.85rem;
+          font-weight: bold;
           margin-bottom: 8px;
           color: #FFF;
         }
 
         .order-button {
           padding: 6px 4px;
-          backgroundColor: transparent;
+          background-color: transparent;
           border: 1px solid #D4AF37;
-          borderRadius: 15px;
+          border-radius: 15px;
           color: #D4AF37;
-          fontWeight: bold;
+          font-weight: bold;
           cursor: pointer;
-          textAlign: center;
+          text-align: center;
           text-decoration: none;
           font-size: 0.7rem;
           transition: background-color 0.2s;
         }
 
         .contact-banner {
-          marginTop: 40px;
+          margin-top: 40px;
           padding: 20px 15px;
-          backgroundColor: rgba(212, 175, 55, 0.05);
+          background-color: rgba(212, 175, 55, 0.05);
           border: 1px dashed #D4AF37;
-          borderRadius: 12px;
-          textAlign: center;
+          border-radius: 12px;
+          text-align: center;
         }
 
         .banner-title {
           color: #D4AF37;
-          marginBottom: 8px;
+          margin-bottom: 8px;
           font-size: 1.1rem;
         }
 
         .banner-text {
-          marginBottom: 8px;
+          margin-bottom: 8px;
           font-size: 0.9rem;
         }
 
         .banner-contacts {
-          fontWeight: bold;
+          font-weight: bold;
           font-size: 0.9rem;
         }
 
         .banner-footer {
-          fontSize: 0.8rem;
+          font-size: 0.8rem;
           opacity: 0.8;
-          marginTop: 4px;
+          margin-top: 4px;
+        }
+
+        .hero-btn {
+          padding: 13px 30px;
+          border-radius: 30px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          text-decoration: none;
+          transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
+          letter-spacing: 0.8px;
+          width: 100%;
+        }
+
+        .primary-btn {
+          background: linear-gradient(135deg, #D4AF37 0%, #aa8c2c 100%);
+          color: #000000;
+          border: 2px solid #D4AF37;
+          box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .secondary-btn {
+          background-color: rgba(0, 0, 0, 0.6);
+          color: #FFFFFF;
+          border: 2px solid rgba(212, 175, 55, 0.5);
+          backdrop-filter: blur(5px);
         }
 
         .error-text, .loading-text {
           color: #FFF;
           text-align: center;
           padding: 100px 20px;
-          fontSize: 1.1rem;
+          font-size: 1.1rem;
         }
         
         .error-text {
           color: #ff6b6b;
         }
 
-        /* Desktop Media Queries for Larger Displays */
         @media (min-width: 768px) {
           .dashboard-container {
             padding: 40px 5%;
@@ -433,24 +523,24 @@ const Dashboard = () => {
             padding: 20px;
           }
           .item-name {
-            fontSize: 1.1rem;
+            font-size: 1.1rem;
             -webkit-line-clamp: unset;
           }
           .item-type {
-            fontSize: 0.9rem;
+            font-size: 0.9rem;
           }
           .item-price {
-            fontSize: 1rem;
+            font-size: 1rem;
           }
           .order-button {
             padding: 10px;
             font-size: 0.9rem;
           }
           .main-category-heading {
-            fontSize: 2rem;
+            font-size: 2rem;
           }
           .sub-category-heading {
-            fontSize: 1.4rem;
+            font-size: 1.4rem;
           }
           .contact-banner {
             padding: 30px;

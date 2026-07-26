@@ -6,10 +6,13 @@ import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+
 dotenv.config();
 
 const app = express();
 const saltRounds = 10;
+const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key';
 
 // 1. Connect to MongoDB Atlas using your environment variable
 mongoose.connect(process.env.MONGO_URI)
@@ -48,7 +51,21 @@ const transporter = nodemailer.createTransport({
   family: 4 
 });
 
-// Middleware to check if user is verified
+// Middleware to authenticate JWT token from headers
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  
+  if (!token) return res.status(401).send("Access Denied: No token provided.");
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).send("Invalid or expired token.");
+    req.user = user; // Contains user id/email payload
+    next();
+  });
+};
+
+// Middleware to check if user is verified (can work alongside token authentication)
 const checkVerified = async (req, res, next) => {
   const userEmail = req.headers['user-email']; 
   try {
@@ -65,7 +82,6 @@ const checkVerified = async (req, res, next) => {
 // ==========================================
 app.get('/api/products-catalog', checkVerified, (req, res) => {
   try {
-    // Reads products.json dynamically from the root folder on Render/Local
     const filePath = path.join(process.cwd(), 'products.json');
     const rawData = fs.readFileSync(filePath, 'utf8');
     const productsData = JSON.parse(rawData);
@@ -76,6 +92,22 @@ app.get('/api/products-catalog', checkVerified, (req, res) => {
     res.status(500).send("Failed to load products catalog from file.");
   }
 });
+
+// ==========================================
+// Secure Client Profile Endpoint
+// ==========================================
+app.get('/api/client-profile', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password -verificationCode -resetCode');
+    if (!user) return res.status(404).send("User profile not found.");
+    
+    res.status(200).json(user);
+  } catch (err) {
+    console.error("Error fetching client profile:", err);
+    res.status(500).send("Server error while retrieving profile.");
+  }
+});
+
 // Root Route
 app.get('/', (req, res) => {
   res.status(200).send("Triple Crown Backend API is running successfully!");
@@ -105,8 +137,6 @@ app.post('/api/register', async (req, res) => {
     });
 
     await newUser.save();
-    
-    const baseUrl = req.protocol + '://' + req.get('host');
 
     await transporter.sendMail({
       from: 'tcrown193@gmail.com', 
@@ -140,18 +170,30 @@ app.post('/api/verify-code', async (req, res) => {
   }
 });
 
-// Login Route
+// Login Route (Generates JWT)
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
     if (user && await bcrypt.compare(password, user.password)) {
       if (!user.verified) return res.status(403).send("Please verify your email first.");
-      res.status(200).send({ message: "Login successful", user });
+      
+      const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
+
+      const safeUserObject = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        verified: user.verified
+      };
+
+      res.status(200).json({ message: "Login successful", token, user: safeUserObject });
     } else {
       res.status(401).send("Invalid email or password");
     }
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).send("Server error during login.");
   }
 });
