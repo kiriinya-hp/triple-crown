@@ -61,25 +61,28 @@ const Hero = () => {
     const targetUrl = `https://wa.me/254799394055?text=${encodeURIComponent(inquiryText)}`;
 
     if (!loggedInUser) {
-      // User is not registered/logged in, intercept and show auth/registration modal
       setWhatsappUrl(targetUrl);
       setShowAuthModal(true);
     } else {
-      // User is registered/logged in, proceed directly to WhatsApp
       window.open(targetUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
   const handleAuthRedirect = (isRegistering) => {
-    // Placeholder logic for routing to register or dashboard/login page
     setShowAuthModal(false);
-    // You can replace this route path with your actual registration/login page route handler
+    // If they choose to login or register, you can also pass them through or directly to dashboard
     window.location.href = isRegistering ? '/register' : '/dashboard';
+  };
+
+  // Direct dashboard entry handler
+  const handleDashboardAccess = (e) => {
+    e.preventDefault();
+    // Optional: Auto-set a dummy session token or check user state here if needed
+    window.location.href = '/dashboard';
   };
 
   return (
     <section className="hero-section">
-      {/* Decorative ambient background glows */}
       <div className="hero-glow-bg glow-1"></div>
       <div className="hero-glow-bg glow-2"></div>
 
@@ -90,9 +93,9 @@ const Hero = () => {
         <p className="hero-description">{description}</p>
         
         <div className="hero-cta-group">
-          {/* Redirects directly to the dashboard */}
-          <a href="/dashboard" className="hero-btn primary-btn">Explore Collection</a>
-          <a href="/dashboard" className="hero-btn secondary-btn">Discover Fragrances</a>
+          {/* Direct access buttons linked to dashboard */}
+          <button onClick={handleDashboardAccess} className="hero-btn primary-btn">Explore Collection</button>
+          <button onClick={handleDashboardAccess} className="hero-btn secondary-btn">Discover Fragrances</button>
         </div>
       </div>
       
@@ -114,7 +117,6 @@ const Hero = () => {
         ))}
       </div>
 
-      {/* WhatsApp Inquiry General CTA Button with Account Guard */}
       <div className="hero-general-inquiry">
         <a 
           href="#whatsapp" 
@@ -125,7 +127,6 @@ const Hero = () => {
         </a>
       </div>
 
-      {/* Authentication / Registration Modal Popup */}
       {showAuthModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -383,7 +384,6 @@ const Hero = () => {
           transform: scale(1.015);
         }
 
-        /* Modal Styles */
         .modal-overlay {
           position: fixed;
           top: 0;
