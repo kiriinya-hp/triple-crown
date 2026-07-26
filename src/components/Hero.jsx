@@ -4,7 +4,7 @@ const Hero = () => {
   const tagline = "Style that empowers. Beauty that lasts.";
   const description = "Experience the pinnacle of sophistication. From our Effortless Chic romper collection to our curated selection of Premium Arabic and Luxury perfumes, we bring you timeless elegance for the modern individual.";
   
-  // Organization details to add more depth/context without changing core design
+  // Organization details moved to the bottom layout
   const orgDetails = [
     { label: "Founded", value: "2026" },
     { label: "Specialty", value: "Luxury Fragrances & Designer Fashion" },
@@ -29,7 +29,7 @@ const Hero = () => {
 
   const [windowIndices, setWindowIndices] = useState([0, 1, 2, 3]);
 
-  // "Glapgosirimm" effect simulated via a smooth fading/glitch-tint transition tracker or staggered interval updates
+  // "Glapgosirimm" effect simulated via a smooth pulse/transition tracker
   const [glitchActive, setGlitchActive] = useState(false);
 
   useEffect(() => {
@@ -61,22 +61,22 @@ const Hero = () => {
         <h1 className="hero-title">Triple Crown Fragrance and Design</h1>
         <p className="hero-tagline">{tagline}</p>
         <p className="hero-description">{description}</p>
-        
-        {/* Additional Organization Details with Algorithmic/Glapgosirimm Styling Effect */}
-        <div className={`org-details-bar ${glitchActive ? 'glapgosirimm-pulse' : ''}`}>
-          {orgDetails.map((item, idx) => (
-            <div key={idx} className="org-detail-item">
-              <span className="org-detail-label">{item.label}</span>
-              <span className="org-detail-value">{item.value}</span>
-            </div>
-          ))}
-        </div>
       </div>
       
       <div className="hero-grid">
         {windowIndices.map((imgIndex, i) => (
           <div key={i} className="hero-window" style={{ animationDelay: `${i * 0.5}s` }}>
             <img src={allImages[imgIndex]} alt="Product showcase" className="hero-img" loading="lazy" />
+          </div>
+        ))}
+      </div>
+
+      {/* Additional Organization Details positioned at the bottom with Algorithmic/Glapgosirimm Styling Effect */}
+      <div className={`org-details-bar ${glitchActive ? 'glapgosirimm-pulse' : ''}`}>
+        {orgDetails.map((item, idx) => (
+          <div key={idx} className="org-detail-item">
+            <span className="org-detail-label">{item.label}</span>
+            <span className="org-detail-value">{item.value}</span>
           </div>
         ))}
       </div>
@@ -107,23 +107,23 @@ const Hero = () => {
 
         .hero-description {
           max-width: 800px;
-          margin: 0 auto 15px auto;
+          margin: 0 auto 20px auto;
           line-height: 1.5;
           font-size: 0.95rem;
           opacity: 0.9;
           padding: 0 10px;
         }
 
-        /* Added organization details layout maintaining the luxury dark/gold theme */
+        /* Organization details layout at the bottom maintaining the luxury dark/gold theme */
         .org-details-bar {
           display: flex;
           justify-content: center;
           align-items: center;
           gap: 20px;
           flex-wrap: wrap;
-          margin: 0 auto 25px auto;
+          margin: 30px auto 10px auto;
           max-width: 800px;
-          padding: 10px 15px;
+          padding: 15px;
           border-top: 1px solid rgba(212, 175, 55, 0.3);
           border-bottom: 1px solid rgba(212, 175, 55, 0.3);
           transition: all 0.3s ease;
@@ -194,6 +194,7 @@ const Hero = () => {
           }
           .org-details-bar {
             gap: 40px;
+            margin-top: 40px;
           }
           .hero-grid {
             grid-template-columns: repeat(4, 1fr);
