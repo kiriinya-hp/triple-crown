@@ -9,12 +9,10 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', password: '', confirmPassword: '' });
   
-  // State to manage email verification step and server cold-start loading
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Use environment variable if available, fallback to live Render URL (or localhost for local dev if needed)
   const API_URL = import.meta.env.VITE_API_URL || 'https://triple-crown-4a9k.onrender.com';
 
   useEffect(() => {
@@ -26,31 +24,44 @@ const Register = () => {
 
   const styles = {
     pageContainer: {
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      backgroundImage: `url(${backgrounds[bgIndex]})`, backgroundSize: 'auto 120%',
-      backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundColor: '#000000',
-      transition: 'background-image 1s ease-in-out', position: 'relative'
+      minHeight: 'calc(100vh - 70px)', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      backgroundImage: `url(${backgrounds[bgIndex]})`, backgroundSize: 'cover', backgroundPosition: 'center',
+      backgroundColor: '#000000', transition: 'background-image 1s ease-in-out', position: 'relative', padding: '20px 16px', boxSizing: 'border-box'
     },
-    overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.6)' },
-    card: {
-      position: 'relative', background: 'rgba(255, 255, 255, 0.05)',
-      backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)',
-      border: '1px solid rgba(255, 255, 255, 0.18)', borderRadius: '20px',
-      padding: '40px', width: '90%', maxWidth: '400px',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#FFF'
+    overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 1 },
+    cardContainer: {
+      position: 'relative', zIndex: 2, width: '100%', maxWidth: '420px',
+      background: 'rgba(20, 20, 20, 0.85)', backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(212, 175, 55, 0.3)',
+      borderRadius: '20px', overflow: 'hidden', boxShadow: '0 15px 35px rgba(0, 0, 0, 0.7)',
+      display: 'flex', flexDirection: 'column', color: '#FFF', boxSizing: 'border-box'
     },
-    logo: { height: '100px', marginBottom: '20px', objectFit: 'contain' },
-    title: { color: '#D4AF37', fontSize: '2rem', marginBottom: '20px' },
-    subtitle: { fontSize: '0.9rem', textAlign: 'center', marginBottom: '20px', color: '#ccc' },
-    inputGroup: { position: 'relative', width: '100%', marginBottom: '15px' },
+    topHeaderPanel: {
+      background: 'linear-gradient(135deg, #0b2531 0%, #000000 100%)',
+      padding: '30px 20px', textAlign: 'center', borderBottom: '1px solid rgba(212, 175, 55, 0.2)',
+      borderBottomLeftRadius: '40px', borderBottomRightRadius: '40px'
+    },
+    logo: { height: '50px', marginBottom: '10px', objectFit: 'contain' },
+    headerTitle: { color: '#FFF', fontSize: '1.5rem', fontWeight: '700', marginBottom: '5px' },
+    headerSubtitle: { color: '#ccc', fontSize: '0.85rem', marginBottom: '15px' },
+    switchButtonOutline: {
+      backgroundColor: 'transparent', border: '1px solid #D4AF37', color: '#D4AF37',
+      padding: '8px 24px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer'
+    },
+    formBody: { padding: '25px 30px', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+    title: { color: '#D4AF37', fontSize: '1.4rem', marginBottom: '15px', fontWeight: '700' },
+    subtitle: { fontSize: '0.85rem', textAlign: 'center', marginBottom: '15px', color: '#ccc' },
+    inputGroup: { position: 'relative', width: '100%', marginBottom: '14px' },
     input: {
-      padding: '15px', borderRadius: '30px', border: '1px solid rgba(255, 255, 255, 0.3)',
-      backgroundColor: 'rgba(0, 0, 0, 0.2)', color: '#FFF', width: '100%', boxSizing: 'border-box'
+      padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.25)',
+      backgroundColor: 'rgba(0, 0, 0, 0.4)', color: '#FFF', width: '100%', boxSizing: 'border-box',
+      fontSize: '15px', outline: 'none'
     },
-    eyeIcon: { position: 'absolute', right: '20px', top: '15px', cursor: 'pointer', color: '#FFF' },
+    eyeIcon: { position: 'absolute', right: '16px', top: '14px', cursor: 'pointer', color: '#ccc' },
     button: {
-      padding: '15px', backgroundColor: '#D4AF37', border: 'none', borderRadius: '30px',
-      color: '#000', fontWeight: 'bold', cursor: 'pointer', width: '100%', marginTop: '10px'
+      padding: '14px', backgroundColor: '#D4AF37', border: 'none', borderRadius: '12px',
+      color: '#000', fontWeight: 'bold', cursor: 'pointer', width: '100%', marginTop: '6px',
+      boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)'
     }
   };
 
@@ -117,47 +128,67 @@ const Register = () => {
   return (
     <div style={styles.pageContainer}>
       <div style={styles.overlay}></div>
-      <div style={styles.card}>
-        <img src="/logo.jpeg" alt="Logo" style={styles.logo} />
+      <div style={styles.cardContainer}>
         
-        {!isVerifying ? (
-          <>
-            <h2 style={styles.title}>Sign Up</h2>
-            <form onSubmit={handleRegister} style={{ width: '100%' }}>
-              <input type="text" placeholder="Full Name" style={styles.input} required onChange={(e) => setFormData({...formData, name: e.target.value})} />
-              <input type="email" placeholder="Email" style={styles.input} required onChange={(e) => setFormData({...formData, email: e.target.value})} />
-              <input type="tel" placeholder="Phone Number" style={styles.input} required onChange={(e) => setFormData({...formData, phone: e.target.value})} />
-              
-              <div style={styles.inputGroup}>
-                <input type={showPassword ? "text" : "password"} placeholder="Password" style={styles.input} required onChange={(e) => setFormData({...formData, password: e.target.value})} />
-                <span style={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <FaEyeSlash /> : <FaEye />}</span>
-              </div>
-              
-              <input type="password" placeholder="Confirm Password" style={styles.input} required onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} />
-              <button type="submit" style={styles.button} disabled={loading}>
-                {loading ? "Connecting to server..." : "Register"}
-              </button>
-            </form>
-          </>
-        ) : (
-          <>
-            <h2 style={styles.title}>Verify Email</h2>
-            <p style={styles.subtitle}>Enter the verification code sent to <strong>{formData.email}</strong></p>
-            <form onSubmit={handleVerifyCode} style={{ width: '100%' }}>
-              <input 
-                type="text" 
-                placeholder="Enter Verification Code" 
-                style={{ ...styles.input, textAlign: 'center', letterSpacing: '2px', fontSize: '1.2rem' }} 
-                required 
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)} 
-              />
-              <button type="submit" style={styles.button} disabled={loading}>
-                {loading ? "Verifying..." : "Verify Code"}
-              </button>
-            </form>
-          </>
-        )}
+        <div style={styles.topHeaderPanel}>
+          <img src="/logo.jpeg" alt="Logo" style={styles.logo} />
+          <h3 style={styles.headerTitle}>Welcome Back!</h3>
+          <p style={styles.headerSubtitle}>Already have an account?</p>
+          <button style={styles.switchButtonOutline} onClick={() => navigate('/login')}>
+            Sign In
+          </button>
+        </div>
+
+        <div style={styles.formBody}>
+          {!isVerifying ? (
+            <>
+              <h2 style={styles.title}>Create Account</h2>
+              <form onSubmit={handleRegister} style={{ width: '100%' }}>
+                <div style={styles.inputGroup}>
+                  <input type="text" placeholder="Full Name" style={styles.input} required onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                </div>
+                <div style={styles.inputGroup}>
+                  <input type="email" placeholder="Email Address" style={styles.input} required onChange={(e) => setFormData({...formData, email: e.target.value})} />
+                </div>
+                <div style={styles.inputGroup}>
+                  <input type="tel" placeholder="Phone Number" style={styles.input} required onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+                </div>
+                
+                <div style={styles.inputGroup}>
+                  <input type={showPassword ? "text" : "password"} placeholder="Password" style={styles.input} required onChange={(e) => setFormData({...formData, password: e.target.value})} />
+                  <span style={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <FaEyeSlash /> : <FaEye />}</span>
+                </div>
+                
+                <div style={styles.inputGroup}>
+                  <input type="password" placeholder="Confirm Password" style={styles.input} required onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} />
+                </div>
+                
+                <button type="submit" style={styles.button} disabled={loading}>
+                  {loading ? "Connecting to server..." : "Sign Up"}
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <h2 style={styles.title}>Verify Email</h2>
+              <p style={styles.subtitle}>Enter the verification code sent to <strong>{formData.email}</strong></p>
+              <form onSubmit={handleVerifyCode} style={{ width: '100%' }}>
+                <input 
+                  type="text" 
+                  placeholder="Enter Verification Code" 
+                  style={{ ...styles.input, textAlign: 'center', letterSpacing: '2px', fontSize: '1.2rem', marginBottom: '14px' }} 
+                  required 
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)} 
+                />
+                <button type="submit" style={styles.button} disabled={loading}>
+                  {loading ? "Verifying..." : "Verify Code"}
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+
       </div>
     </div>
   );
