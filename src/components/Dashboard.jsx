@@ -9,8 +9,9 @@ const Dashboard = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userEmail = localStorage.getItem('userEmail');
+    // Read secure session tokens from sessionStorage instead of localStorage
+    const token = sessionStorage.getItem('token');
+    const userEmail = sessionStorage.getItem('userEmail');
 
     // 1. Fetch products catalog from backend (public or verified)
     fetch('https://triple-crown-4a9k.onrender.com/api/products-catalog', {
@@ -58,14 +59,14 @@ const Dashboard = () => {
     }
   }, []);
 
-  // Handler for WhatsApp inquiry with restricted access check
+  // Handler for WhatsApp inquiry with restricted access check using sessionStorage
   const handleWhatsAppInquiry = (e, inquiryText) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    const isEmailVerified = localStorage.getItem('isVerified') === 'true'; 
+    const token = sessionStorage.getItem('token');
+    const isEmailVerified = sessionStorage.getItem('isVerified') === 'true'; 
     const targetUrl = `https://wa.me/254799394055?text=${encodeURIComponent(inquiryText)}`;
 
-    // Limit access if the user lacks a valid token or is unverified[cite: 8]
+    // Limit access if the user lacks a valid token or is unverified
     if (!token || !isEmailVerified) {
       setShowAuthModal(true); 
     } else {
@@ -78,6 +79,15 @@ const Dashboard = () => {
     window.location.href = isRegistering ? '/register' : '/login';
   };
 
+  // Handler for logging out the user from sessionStorage
+  const handleLogout = () => {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('userEmail');
+    sessionStorage.removeItem('isVerified');
+    sessionStorage.removeItem('user');
+    window.location.href = '/login';
+  };
+
   if (errorMsg) return <div className="error-text">Access Error: {errorMsg}</div>;
   if (!productsData) return <div className="loading-text">Loading Dashboard...</div>;
 
@@ -87,15 +97,24 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      {/* Top Bar with Profile Icon */}
+      {/* Top Bar with Profile and Logout Icons */}
       <div className="top-bar">
-        <button 
-          className="profile-icon-btn" 
-          onClick={() => setShowProfileModal(true)}
-          title="View Client Profile"
-        >
-          👤
-        </button>
+        <div className="top-bar-actions">
+          <button 
+            className="profile-icon-btn" 
+            onClick={() => setShowProfileModal(true)}
+            title="View Client Profile"
+          >
+            👤
+          </button>
+          <button 
+            className="logout-icon-btn" 
+            onClick={handleLogout}
+            title="Log Out"
+          >
+            🚪
+          </button>
+        </div>
       </div>
 
       {/* Client Profile Modal */}
@@ -212,7 +231,13 @@ const Dashboard = () => {
           margin-bottom: 15px;
         }
 
-        .profile-icon-btn {
+        .top-bar-actions {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+        }
+
+        .profile-icon-btn, .logout-icon-btn {
           background-color: transparent;
           border: 1px solid #D4AF37;
           border-radius: 50%;
@@ -225,6 +250,15 @@ const Dashboard = () => {
           align-items: center;
           justify-content: center;
           transition: all 0.3s ease;
+        }
+
+        .logout-icon-btn {
+          border-color: #ff6b6b;
+          color: #ff6b6b;
+        }
+
+        .logout-icon-btn:hover {
+          background-color: rgba(255, 107, 107, 0.1);
         }
 
         .modal-overlay {
