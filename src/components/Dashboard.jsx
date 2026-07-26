@@ -12,7 +12,7 @@ const Dashboard = () => {
     const token = localStorage.getItem('token');
     const userEmail = localStorage.getItem('userEmail');
 
-    // 1. Fetch products catalog from backend with proper headers matching checkVerified middleware
+    // 1. Fetch products catalog from backend (public or verified)
     fetch('https://triple-crown-4a9k.onrender.com/api/products-catalog', {
       method: 'GET',
       headers: {
@@ -65,7 +65,7 @@ const Dashboard = () => {
     const isEmailVerified = localStorage.getItem('isVerified') === 'true'; 
     const targetUrl = `https://wa.me/254799394055?text=${encodeURIComponent(inquiryText)}`;
 
-    // Limit access if the user lacks a valid token or is unverified
+    // Limit access if the user lacks a valid token or is unverified[cite: 8]
     if (!token || !isEmailVerified) {
       setShowAuthModal(true); 
     } else {
@@ -106,7 +106,7 @@ const Dashboard = () => {
             <h2 className="modal-title">Client Profile</h2>
             {clientProfile ? (
               <div className="profile-details">
-                <p><strong>Name:</strong> {clientProfile.name || clientProfile.username || 'N/A'}</p>
+                <p><strong>Name:</strong> {clientProfile.name || 'N/A'}</p>
                 <p><strong>Email:</strong> {clientProfile.email || 'N/A'}</p>
                 <p><strong>Phone:</strong> {clientProfile.phone || 'N/A'}</p>
               </div>

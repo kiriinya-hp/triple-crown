@@ -26,7 +26,7 @@ const Login = () => {
     return () => clearInterval(interval);
   }, [backgrounds.length]);
 
-  // 1. Handle Regular Login
+  // 1. Handle Regular Login & Store Session Credentials
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -42,9 +42,16 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
+        
+        // SAVE SESSION TO LOCALSTORAGE FOR THE DASHBOARD & WHATSAPP GATING
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userEmail', data.user.email);
+        localStorage.setItem('isVerified', data.user.verified ? 'true' : 'false');
+        
         const safeUser = { ...data.user };
         delete safeUser.password;
         localStorage.setItem('user', JSON.stringify(safeUser));
+        
         navigate('/dashboard');
       } else {
         const errorText = await response.text();
@@ -292,7 +299,6 @@ const Login = () => {
       <div style={styles.loginCard}>
         <img src="/logo.jpeg" alt="Triple Crown Logo" style={styles.logo} />
         
-        {/* VIEW 1: LOGIN */}
         {viewMode === 'login' && (
           <>
             <h2 style={styles.title}>Sign In</h2>
@@ -311,7 +317,6 @@ const Login = () => {
           </>
         )}
 
-        {/* VIEW 2: UNVERIFIED -> ENTER CODE */}
         {viewMode === 'verify' && (
           <>
             <h2 style={styles.title}>Verify Email</h2>
@@ -329,7 +334,6 @@ const Login = () => {
           </>
         )}
 
-        {/* VIEW 3: FORGOT PASSWORD -> REQUEST RESET CODE */}
         {viewMode === 'forgot' && (
           <>
             <h2 style={styles.title}>Reset Password</h2>
@@ -345,7 +349,6 @@ const Login = () => {
           </>
         )}
 
-        {/* VIEW 4: RESET PASSWORD -> ENTER CODE & NEW PASSWORD */}
         {viewMode === 'reset' && (
           <>
             <h2 style={styles.title}>New Password</h2>
