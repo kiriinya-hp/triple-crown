@@ -27,7 +27,8 @@ const Hero = () => {
     return newIndex;
   };
 
-  const [windowIndices, setWindowIndices] = useState([0, 1, 2, 3]);
+  // Expanded grid count to 6 display windows for a richer visual layout
+  const [windowIndices, setWindowIndices] = useState([0, 1, 2, 3, 4, 0]);
   const [glitchActive, setGlitchActive] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [whatsappUrl, setWhatsappUrl] = useState('');
@@ -45,7 +46,7 @@ const Hero = () => {
           next[i] = getRandomIndex(next[i]);
           return next;
         });
-      }, 3000 + (i * 1000));
+      }, 3000 + (i * 800));
     });
 
     const glitchInterval = setInterval(() => {
@@ -109,6 +110,7 @@ const Hero = () => {
 
       <div className="hero-glow-bg glow-1"></div>
       <div className="hero-glow-bg glow-2"></div>
+      <div className="hero-glow-bg glow-3"></div>
 
       <div className="hero-content">
         <span className="hero-badge">
@@ -131,21 +133,23 @@ const Hero = () => {
         </div>
       </div>
       
+      {/* Enhanced multi-window asymmetrical showcase grid */}
       <div className="hero-grid">
         {windowIndices.map((imgIndex, i) => (
           <div 
             key={i} 
-            className={`hero-window ${isHovered === i ? 'window-active-hover' : ''}`}
+            className={`hero-window window-card-${i + 1} ${isHovered === i ? 'window-active-hover' : ''}`}
             onMouseEnter={() => setIsHovered(i)}
             onMouseLeave={() => setIsHovered(null)}
             style={{ 
-              animationDelay: `${i * 0.5}s`,
+              animationDelay: `${i * 0.4}s`,
               transform: `perspective(1000px) rotateY(${mousePos.x * 12}deg) rotateX(${-mousePos.y * 12}deg)`
             }}
           >
             <div className="hero-img-overlay"></div>
             <img src={allImages[imgIndex]} alt="Product showcase" className="hero-img" loading="lazy" />
             <div className="window-glint"></div>
+            <div className="window-badge-tag">Featured 0{i + 1}</div>
           </div>
         ))}
       </div>
@@ -185,8 +189,8 @@ const Hero = () => {
 
       <style>{`
         .hero-section {
-          padding: 60px 20px;
-          background: radial-gradient(circle at 50% 30%, #121212 0%, #050505 60%, #000000 100%);
+          padding: 80px 20px;
+          background: radial-gradient(circle at 50% 20%, #1a1a1a 0%, #080808 55%, #000000 100%);
           color: #FFFFFF;
           text-align: center;
           width: 100%;
@@ -200,33 +204,34 @@ const Hero = () => {
           position: absolute;
           top: 30%;
           left: 50%;
-          width: 500px;
-          height: 500px;
-          background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, rgba(0,0,0,0) 70%);
+          width: 600px;
+          height: 600px;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, rgba(0,0,0,0) 70%);
           pointer-events: none;
           transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1);
           z-index: 1;
-          margin-left: -250px;
-          margin-top: -250px;
+          margin-left: -300px;
+          margin-top: -300px;
         }
 
         .hero-glow-bg {
           position: absolute;
-          width: 450px;
-          height: 450px;
-          background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+          width: 500px;
+          height: 500px;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
           border-radius: 50%;
           z-index: 1;
           pointer-events: none;
-          filter: blur(40px);
+          filter: blur(50px);
         }
 
-        .glow-1 { top: -150px; left: -150px; animation: pulseGlow 8s ease-in-out infinite alternate; }
-        .glow-2 { bottom: -150px; right: -150px; animation: pulseGlow 8s ease-in-out infinite alternate-reverse; }
+        .glow-1 { top: -150px; left: -100px; animation: pulseGlow 8s ease-in-out infinite alternate; }
+        .glow-2 { bottom: -150px; right: -100px; animation: pulseGlow 8s ease-in-out infinite alternate-reverse; }
+        .glow-3 { top: 40%; left: 30%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(212, 175, 55, 0.06) 0%, rgba(0,0,0,0) 70%); }
 
         @keyframes pulseGlow {
-          0% { transform: scale(1); opacity: 0.6; }
-          100% { transform: scale(1.25); opacity: 1; }
+          0% { transform: scale(1); opacity: 0.5; }
+          100% { transform: scale(1.3); opacity: 0.9; }
         }
 
         .hero-content {
@@ -270,7 +275,7 @@ const Hero = () => {
           background: linear-gradient(135deg, #fff 20%, #D4AF37 70%, #aa8c2c 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
-          font-size: clamp(2.2rem, 5.5vw, 4.2rem);
+          font-size: clamp(2.4rem, 6vw, 4.5rem);
           margin: 0 0 12px 0;
           line-height: 1.15;
           font-weight: 800;
@@ -280,7 +285,7 @@ const Hero = () => {
 
         .hero-tagline {
           font-style: italic;
-          font-size: 1.15rem;
+          font-size: 1.2rem;
           margin-bottom: 18px;
           color: #e5e5e5;
           letter-spacing: 0.8px;
@@ -289,9 +294,9 @@ const Hero = () => {
 
         .hero-description {
           max-width: 780px;
-          margin: 0 auto 30px auto;
+          margin: 0 auto 35px auto;
           line-height: 1.7;
-          font-size: 1.05rem;
+          font-size: 1.08rem;
           opacity: 0.85;
           padding: 0 15px;
           color: #cccccc;
@@ -301,12 +306,12 @@ const Hero = () => {
           display: flex;
           justify-content: center;
           gap: 18px;
-          margin-bottom: 30px;
+          margin-bottom: 35px;
           flex-wrap: wrap;
         }
 
         .hero-general-inquiry {
-          margin-top: 30px;
+          margin-top: 35px;
           position: relative;
           z-index: 2;
         }
@@ -392,40 +397,48 @@ const Hero = () => {
           box-shadow: 0 10px 25px rgba(212, 175, 55, 0.25);
         }
 
+        /* Upgraded Grid Layout for 6 Interactive Frames */
         .hero-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 16px;
-          padding: 20px 0;
-          max-width: 1200px;
+          padding: 25px 0;
+          max-width: 1250px;
           margin: 0 auto;
           position: relative;
           z-index: 2;
         }
 
         .hero-window {
-          height: 200px;
-          border-radius: 16px;
+          height: 210px;
+          border-radius: 18px;
           border: 2px solid rgba(212, 175, 55, 0.4);
           overflow: hidden;
           position: relative;
-          animation: floatTranslate 5s ease-in-out infinite;
+          animation: floatTranslate 6s ease-in-out infinite;
           background: #111;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+          box-shadow: 0 12px 35px rgba(0, 0, 0, 0.75);
           transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease-out;
           transform-style: preserve-3d;
         }
 
+        /* Staggered window design heights and float offsets */
+        .window-card-2 { animation-delay: 0.8s; }
+        .window-card-3 { animation-delay: 1.6s; }
+        .window-card-4 { animation-delay: 2.4s; }
+        .window-card-5 { animation-delay: 3.2s; }
+        .window-card-6 { animation-delay: 4.0s; }
+
         .hero-window:hover {
           border-color: #D4AF37;
-          box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+          box-shadow: 0 20px 45px rgba(212, 175, 55, 0.45);
           z-index: 10;
         }
 
         .window-glint {
           position: absolute;
           inset: 0;
-          background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+          background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
           opacity: 0;
           transition: opacity 0.3s ease;
           pointer-events: none;
@@ -435,10 +448,26 @@ const Hero = () => {
           opacity: 1;
         }
 
+        .window-badge-tag {
+          position: absolute;
+          bottom: 12px;
+          left: 12px;
+          background: rgba(10, 10, 10, 0.75);
+          border: 1px solid rgba(212, 175, 55, 0.5);
+          color: #f7e2a0;
+          font-size: 0.65rem;
+          padding: 4px 10px;
+          border-radius: 20px;
+          letter-spacing: 1px;
+          z-index: 3;
+          backdrop-filter: blur(5px);
+          text-transform: uppercase;
+        }
+
         .hero-img-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
+          background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 60%);
           z-index: 1;
           pointer-events: none;
         }
@@ -451,12 +480,12 @@ const Hero = () => {
         }
 
         .hero-window:hover .hero-img {
-          transform: scale(1.08);
+          transform: scale(1.1);
         }
 
         @keyframes floatTranslate { 
           0%, 100% { transform: translateY(0px) rotate(0deg); } 
-          50% { transform: translateY(-10px) rotate(0.5deg); } 
+          50% { transform: translateY(-10px) rotate(0.4deg); } 
         }
 
         .org-details-bar {
@@ -465,7 +494,7 @@ const Hero = () => {
           align-items: center;
           gap: 24px;
           flex-wrap: wrap;
-          margin: 40px auto 10px auto;
+          margin: 45px auto 10px auto;
           max-width: 950px;
           padding: 20px 24px;
           background: rgba(12, 12, 12, 0.8);
@@ -603,18 +632,18 @@ const Hero = () => {
 
         @media (min-width: 768px) {
           .hero-section {
-            padding: 80px 5%;
+            padding: 90px 5%;
           }
           .org-details-bar {
             gap: 35px;
-            margin-top: 50px;
+            margin-top: 55px;
           }
           .hero-grid {
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 22px;
           }
           .hero-window {
-            height: 320px;
+            height: 260px;
           }
           .hero-tagline {
             font-size: 1.3rem;
