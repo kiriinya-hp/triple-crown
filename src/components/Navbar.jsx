@@ -182,7 +182,10 @@ const Navbar = () => {
           position: sticky;
           top: 0;
           z-index: 1000;
+          width: 100%;
+          box-sizing: border-box;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          margin: 0;
         }
 
         .navbar-scrolled {

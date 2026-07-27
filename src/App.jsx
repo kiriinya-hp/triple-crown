@@ -6,6 +6,7 @@ import About from './components/About';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
+import './global.css';
 
 const App = () => {
   return (
