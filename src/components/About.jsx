@@ -13,11 +13,7 @@ const About = () => {
       boxShadow: '0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
       color: '#FFFFFF',
       textAlign: 'center',
-      width: '100vw',
-      left: '50%',
-      right: '50%',
-      marginLeft: '-50vw',
-      marginRight: '-50vw',
+      width: '100%', // Changed from 100vw to 100% to prevent overlapping/horizontal overflow
       boxSizing: 'border-box',
       overflow: 'hidden',
       marginTop: '60px',
