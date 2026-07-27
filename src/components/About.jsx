@@ -13,9 +13,7 @@ const About = () => {
       boxShadow: '0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
       color: '#FFFFFF',
       textAlign: 'center',
-      /* Edge-to-edge layout styling to prevent white borders/gaps */
       width: '100vw',
-      position: 'relative',
       left: '50%',
       right: '50%',
       marginLeft: '-50vw',
@@ -168,7 +166,6 @@ const About = () => {
 
   return (
     <section id="about" style={styles.section}>
-      {/* Ambient background lighting elements for premium look */}
       <div style={styles.glowOrb1}></div>
       <div style={styles.glowOrb2}></div>
 
@@ -184,7 +181,6 @@ const About = () => {
           </p>
 
           <div style={styles.gridContainer}>
-            {/* Social Media Card with built-in Lucide/SVG Icons */}
             <div style={styles.card} className="glass-card">
               <h3 style={styles.cardTitle}>Follow Our Journey</h3>
               <ul style={styles.socialList}>
@@ -206,7 +202,6 @@ const About = () => {
               </ul>
             </div>
 
-            {/* Direct Ordering / WhatsApp Contact Card */}
             <div style={styles.card} className="glass-card">
               <h3 style={styles.cardTitle}>Prices & Orders</h3>
               <ul style={styles.contactList}>
@@ -236,7 +231,6 @@ const About = () => {
         </div>
       </div>
 
-      {/* Modern UI Interaction Styles */}
       <style>
         {`
           .glass-card:hover {

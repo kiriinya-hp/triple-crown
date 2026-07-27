@@ -173,7 +173,9 @@ const Navbar = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 18px 6%;
+          width: 100vw;
+          margin: 0;
+          padding: 18px 5%;
           background-color: rgba(5, 5, 5, 0.85);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
@@ -182,11 +184,16 @@ const Navbar = () => {
           position: sticky;
           top: 0;
           z-index: 1000;
+          box-sizing: border-box;
+          left: 50%;
+          right: 50%;
+          margin-left: -50vw;
+          margin-right: -50vw;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .navbar-scrolled {
-          padding: 12px 6%;
+          padding: 12px 5%;
           background-color: rgba(2, 2, 2, 0.95);
           border-bottom: 1px solid rgba(212, 175, 55, 0.45);
           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
@@ -528,7 +535,7 @@ const Navbar = () => {
           }
 
           .btn-shimmer {
-            position: absolute;
+            position: absolute; edge: -50%;
             top: -50%;
             left: -50%;
             width: 200%;
