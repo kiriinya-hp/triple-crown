@@ -23,7 +23,7 @@ const Hero = () => {
     '/kali.jpg',
     '/lime.jpeg',
     '/yum.jpg',
-    'yara.jpeg'
+    '/yara.jpeg'
   ];
 
   const getRandomIndex = (currentIndex) => {
