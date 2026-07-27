@@ -16,7 +16,14 @@ const Hero = () => {
     '/shoes.jpeg', 
     '/dresses.jpeg',
     '/perfume.png', 
-    '/rubber.jpeg'
+    '/rubber.jpeg',
+    '/club.jpg',
+    '/brown r.jpeg',
+    '/ameerat.jpeg',
+    '/kali.jpg',
+    '/lime.jpeg',
+    '/yum.jpg',
+    'yara.jpeg'
   ];
 
   const getRandomIndex = (currentIndex) => {
